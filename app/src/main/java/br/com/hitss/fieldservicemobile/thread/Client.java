@@ -7,11 +7,19 @@ public class Client {
     private static int sCounter;
     private int mId;
     private String mName;
+    private int mMillis;
     private ClientCallback mCallback;
 
     public Client(String name, ClientCallback callback) {
         mId = sCounter++;
         mName = name;
+        mCallback = callback;
+        sClientMap.put(mId, this);
+    }
+
+    public Client(int millis, ClientCallback callback) {
+        mId = sCounter++;
+        mMillis = millis;
         mCallback = callback;
         sClientMap.put(mId, this);
     }
@@ -26,6 +34,14 @@ public class Client {
 
     public int getId() {
         return mId;
+    }
+
+    public int getmMillis() {
+        return mMillis;
+    }
+
+    public void setmMillis(int mMillis) {
+        this.mMillis = mMillis;
     }
 
     public synchronized void onPostReceived(Post post) {

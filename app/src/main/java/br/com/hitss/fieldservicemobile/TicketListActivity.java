@@ -31,7 +31,7 @@ import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
 import br.com.hitss.fieldservicemobile.rest.UserRestClient;
 import br.com.hitss.fieldservicemobile.thread.Client;
 import br.com.hitss.fieldservicemobile.thread.PostOfficeHandlerThread;
-import br.com.hitss.fieldservicemobile.thread.SimulatorRunnable;
+import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
 
 /**
@@ -45,8 +45,8 @@ import br.com.hitss.fieldservicemobile.util.GPSTracker;
 public class TicketListActivity extends AppCompatActivity implements Client.ClientCallback  {
 
 
-    private SimulatorRunnable mSimulator;
-    private PostOfficeHandlerThread mPostOffice;
+    private EnviarLocalizacaoRunnable enviarLocalizacaoRunnable;
+    private PostOfficeHandlerThread postOfficeHandlerThread;
 
     private static final String PREFS_NAME = "PrefsUser";
 
@@ -54,6 +54,7 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
     private UserRestClient userRestClient = new UserRestClient();
 
     private List<Ticket> mTickets = new ArrayList<>();
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(2000);
             }
         });
         // Show the Up button in the action bar.
@@ -78,16 +80,18 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
+        /*BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
         Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
         buscaTicketsAsync.execute();
 
-        enviaLocalizacaoUsuarioLogado();
+        enviaLocalizacaoUsuarioLogado();*/
 
-        mPostOffice = new PostOfficeHandlerThread(new LinkedHashMap<Integer, Handler>());
-        mPostOffice.start();
-        mSimulator = new SimulatorRunnable(mPostOffice, this);
-        mSimulator.createClients(10).start();
+        postOfficeHandlerThread = new PostOfficeHandlerThread(new LinkedHashMap<Integer, Handler>());
+        postOfficeHandlerThread.start();
+        enviarLocalizacaoRunnable = new EnviarLocalizacaoRunnable(postOfficeHandlerThread, this);
+        //enviarLocalizacaoRunnable.createClients(10).start();
+        enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(100);
+        enviarLocalizacaoRunnable.enviarLocalizacao(2).start();
 
     }
 
@@ -108,6 +112,8 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
                 mPostFeedView.getAdapter().notifyItemInserted(position);
                 mPostFeedView.smoothScrollToPosition(position);*/
                 Toast.makeText(TicketListActivity.this, "THREAD...", Toast.LENGTH_LONG).show();
+
+                Log.i("THREAD", "Contador " + count++);
             }
         });
     }
@@ -143,11 +149,8 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
 
     @Override
     protected void onDestroy() {
-
-        mSimulator.stop();
-        mPostOffice.quit();
-
-
+        enviarLocalizacaoRunnable.stop();
+        postOfficeHandlerThread.quit();
 
         logoff();
         super.onDestroy();

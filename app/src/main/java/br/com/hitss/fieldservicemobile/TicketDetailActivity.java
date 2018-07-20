@@ -91,6 +91,7 @@ public class TicketDetailActivity extends AppCompatActivity {
             if (mTicket != null) {
                 Log.i("ticket", mTicket.toString());
                 if (mTicket != null) {
+                    setTitle(mTicket.getPartnerTicketCode());
                     ticketDescricao.setText(mTicket.getProblemDescription());
                     ticketEmpresaSolicitante.setText(mTicket.getUserAffected().getLocation().getCustomer().getName());
                 }
@@ -100,19 +101,4 @@ public class TicketDetailActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
-            navigateUpTo(new Intent(this, TicketListActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }

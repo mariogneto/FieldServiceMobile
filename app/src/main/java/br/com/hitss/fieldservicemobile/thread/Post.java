@@ -5,10 +5,18 @@ public class Post {
     private Integer receiverId;
     private String message;
 
+    public Post () {
+    }
+
     public Post(Integer senderId, Integer receiverId, String message) {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.message = message;
+    }
+
+    public Post(Integer senderId, Integer receiverId) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
     }
 
     public Integer getSenderId() {
