@@ -5,7 +5,9 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -20,12 +22,16 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
 import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
 import br.com.hitss.fieldservicemobile.rest.UserRestClient;
+import br.com.hitss.fieldservicemobile.thread.Client;
+import br.com.hitss.fieldservicemobile.thread.PostOfficeHandlerThread;
+import br.com.hitss.fieldservicemobile.thread.SimulatorRunnable;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
 
 /**
@@ -36,7 +42,11 @@ import br.com.hitss.fieldservicemobile.util.GPSTracker;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class TicketListActivity extends AppCompatActivity {
+public class TicketListActivity extends AppCompatActivity implements Client.ClientCallback  {
+
+
+    private SimulatorRunnable mSimulator;
+    private PostOfficeHandlerThread mPostOffice;
 
     private static final String PREFS_NAME = "PrefsUser";
 
@@ -73,6 +83,51 @@ public class TicketListActivity extends AppCompatActivity {
         buscaTicketsAsync.execute();
 
         enviaLocalizacaoUsuarioLogado();
+
+        mPostOffice = new PostOfficeHandlerThread(new LinkedHashMap<Integer, Handler>());
+        mPostOffice.start();
+        mSimulator = new SimulatorRunnable(mPostOffice, this);
+        mSimulator.createClients(10).start();
+
+    }
+
+    @Override
+    public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onPostCreate(savedInstanceState);
+
+    }
+
+    @Override
+    public void onNewPost(final Client receiver, final Client sender, final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+               /* int position = mPostListAdapter.getFeedItemList().size();
+                mPostListAdapter.getFeedItemList()
+                        .add(new PostListAdapter.FeedItem(sender.getName(), receiver.getName(), message));
+                mPostFeedView.getAdapter().notifyItemInserted(position);
+                mPostFeedView.smoothScrollToPosition(position);*/
+                Toast.makeText(TicketListActivity.this, "THREAD...", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void enviaLocalizacaoUsuarioLogado() {
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(TicketListActivity.this, "THREAD...", Toast.LENGTH_LONG).show();
+                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                Long idUserFs = settings.getLong("idUserFsLogger", 0L);
+                EnviaPosicaoTecnicoAsync enviaPosicaoTecnicoAsync = new EnviaPosicaoTecnicoAsync();
+                Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
+                GPSTracker gpsTracker = new GPSTracker(TicketListActivity.this);
+                Location location = gpsTracker.getLocation();
+                enviaPosicaoTecnicoAsync.execute(String.valueOf(idUserFs), String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+            }
+        }, 3000);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -88,8 +143,18 @@ public class TicketListActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+
+        mSimulator.stop();
+        mPostOffice.quit();
+
+
+
         logoff();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 
     @Override
@@ -99,22 +164,6 @@ public class TicketListActivity extends AppCompatActivity {
             logoff();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void enviaLocalizacaoUsuarioLogado() {
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                Long idUserFs = settings.getLong("idUserFsLogger", 0L);
-                EnviaPosicaoTecnicoAsync enviaPosicaoTecnicoAsync = new EnviaPosicaoTecnicoAsync();
-                Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
-                GPSTracker gpsTracker = new GPSTracker(TicketListActivity.this);
-                Location location = gpsTracker.getLocation();
-                enviaPosicaoTecnicoAsync.execute(String.valueOf(idUserFs), String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
-            }
-        }, 100);
     }
 
     private class BuscaTicketsAsync extends AsyncTask<String, Void, List<Ticket>> {
@@ -191,4 +240,5 @@ public class TicketListActivity extends AppCompatActivity {
             finish();
         }
     }
+
 }
