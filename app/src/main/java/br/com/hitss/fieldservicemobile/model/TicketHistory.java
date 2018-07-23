@@ -29,6 +29,22 @@ public class TicketHistory implements Serializable {
 	public TicketHistory() {
 	}
 
+	public TicketHistory(TicketHistory ticketHistory) {
+		this.setIdTicket(ticketHistory.getIdTicket());
+		this.setIdUserTechnician(ticketHistory.getIdUserTechnician());
+		this.setIdUserExecutor(ticketHistory.getIdUserExecutor());
+		this.setStatus(ticketHistory.getStatus());
+		this.setNote(ticketHistory.getNote());
+	}
+
+    public TicketHistory(Long idTicket,Long idUserTechnician, Long idUserExecutor, String status, String note) {
+        this.setIdTicket(idTicket);
+        this.setIdUserTechnician(idUserTechnician);
+        this.setIdUserExecutor(idUserExecutor);
+        this.setStatus(status);
+        this.setNote(note);
+    }
+
 	public Long getIdTicketHistory() {
 		return this.idTicketHistory;
 	}

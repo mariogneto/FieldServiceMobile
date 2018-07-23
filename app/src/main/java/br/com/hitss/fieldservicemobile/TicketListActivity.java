@@ -66,7 +66,7 @@ public class TicketListActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(2000);
+                enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(4000);
             }
         });
         // Show the Up button in the action bar.
@@ -82,7 +82,7 @@ public class TicketListActivity extends AppCompatActivity {
         enviarLocalizacaoHandlerThread = new EnviarLocalizacaoHandlerThread();
         enviarLocalizacaoHandlerThread.start();
         enviarLocalizacaoRunnable = new EnviarLocalizacaoRunnable(enviarLocalizacaoHandlerThread, this);
-        enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(100);
+        enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(500);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         enviarLocalizacaoRunnable.setIdUSerFsLogged(settings.getLong("idUserFsLogged", 0L));
 
@@ -117,6 +117,18 @@ public class TicketListActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        Boolean isWorking = settings.getBoolean("isWorking", false);
+        if(isWorking){
+            enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(3000);
+        } else {
+            enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(500);
+        }
+        super.onStart();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_logout) {
@@ -143,12 +155,16 @@ public class TicketListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<Ticket> tickets) {
+            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
             if (tickets != null && !tickets.isEmpty()) {
                 Log.i(TAG, tickets.toString());
                 View recyclerView = findViewById(R.id.ticket_list);
                 assert recyclerView != null;
                 setupRecyclerView((RecyclerView) recyclerView);
             } else {
+                Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("isWorking", true);
                 Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
                 Log.i(TAG, "Nenhum ticket encontrado.");
             }

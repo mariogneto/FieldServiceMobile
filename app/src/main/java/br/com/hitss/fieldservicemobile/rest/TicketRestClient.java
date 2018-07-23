@@ -13,8 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 import java.util.List;
 
-import br.com.hitss.fieldservicemobile.TicketDetailActivity;
 import br.com.hitss.fieldservicemobile.model.Ticket;
+import br.com.hitss.fieldservicemobile.model.TicketHistory;
 
 public class TicketRestClient {
 
@@ -33,7 +33,7 @@ public class TicketRestClient {
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             String plainCreds = "web.mobile:wm12345";
             byte[] plainCredsBytes = plainCreds.getBytes();
-            byte[] base64CredsBytes = Base64.encode(plainCredsBytes,Base64.DEFAULT);
+            byte[] base64CredsBytes = Base64.encode(plainCredsBytes, Base64.DEFAULT);
             String base64Creds = new String(base64CredsBytes);
             headers.add(HttpHeaders.AUTHORIZATION, "Basic " + base64Creds);
             headers.add(HttpHeaders.CONTENT_LENGTH, "0");
@@ -73,6 +73,26 @@ public class TicketRestClient {
                     }).getBody();
         } catch (Exception e) {
             Log.e(TAG, "Erro ao buscar tickets", e);
+            throw e;
+        }
+    }
+
+    public void postHistoryByIdTicket(TicketHistory ticketHistory) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        String plainCreds = "web.mobile:wm12345";
+        byte[] plainCredsBytes = plainCreds.getBytes();
+        byte[] base64CredsBytes = Base64.encode(plainCredsBytes, Base64.DEFAULT);
+        String base64Creds = new String(base64CredsBytes);
+        headers.add(HttpHeaders.AUTHORIZATION, "Basic " + base64Creds);
+
+        HttpEntity<TicketHistory> request = new HttpEntity<>(new TicketHistory(ticketHistory), headers);
+
+        try {
+            restTemplate.exchange(
+                    BASE_URL + ticketHistory.getIdTicket() + "/history", HttpMethod.POST, request, TicketHistory.class);
+        } catch (Exception e) {
+            Log.e(TAG, "erro ao fazer POST de TicketHistory.", e);
             throw e;
         }
     }
