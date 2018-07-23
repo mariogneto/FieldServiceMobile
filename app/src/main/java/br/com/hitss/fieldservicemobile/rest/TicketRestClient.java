@@ -39,7 +39,7 @@ public class TicketRestClient {
             headers.add(HttpHeaders.CONTENT_LENGTH, "0");
             headers.add("X-User-Agent", "FIELD_SERVICE_MOBILE");
 
-            HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+            HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
             return restTemplate.exchange(
                     BASE_URL + id,

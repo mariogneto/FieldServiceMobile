@@ -35,7 +35,7 @@ public class UserRestClient {
         String base64Creds = new String(base64CredsBytes);
         headers.add(HttpHeaders.AUTHORIZATION, "Basic " + base64Creds);
 
-        HttpEntity<UserLocationHistory> request = new HttpEntity<UserLocationHistory>(new UserLocationHistory(latitude, longitude), headers);
+        HttpEntity<UserLocationHistory> request = new HttpEntity<>(new UserLocationHistory(latitude, longitude), headers);
 
         try {
             restTemplate.exchange(
