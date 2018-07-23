@@ -17,6 +17,8 @@ import br.com.hitss.fieldservicemobile.model.UserLocationHistory;
 
 public class UserRestClient {
 
+    private static final String TAG = UserRestClient.class.getSimpleName();
+
     private String BASE_URL = "http://10.172.16.78:7080/fieldservice/v1/users/";
     private RestTemplate restTemplate;
 
@@ -29,7 +31,7 @@ public class UserRestClient {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         String plainCreds = "web.mobile:wm12345";
         byte[] plainCredsBytes = plainCreds.getBytes();
-        byte[] base64CredsBytes = Base64.encode(plainCredsBytes,Base64.DEFAULT);
+        byte[] base64CredsBytes = Base64.encode(plainCredsBytes, Base64.DEFAULT);
         String base64Creds = new String(base64CredsBytes);
         headers.add(HttpHeaders.AUTHORIZATION, "Basic " + base64Creds);
 
@@ -39,7 +41,7 @@ public class UserRestClient {
             restTemplate.exchange(
                     BASE_URL + idUserFs + "/locationhistory", HttpMethod.POST, request, UserLocationHistory.class);
         } catch (Exception e) {
-            Log.e("Users:", "erro ao fazer POST de UserLocationHistory.", e);
+            Log.e(TAG, "erro ao fazer POST de UserLocationHistory.", e);
             throw e;
         }
     }
@@ -49,7 +51,7 @@ public class UserRestClient {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         String plainCreds = "web.mobile:wm12345";
         byte[] plainCredsBytes = plainCreds.getBytes();
-        byte[] base64CredsBytes = Base64.encode(plainCredsBytes,Base64.DEFAULT);
+        byte[] base64CredsBytes = Base64.encode(plainCredsBytes, Base64.DEFAULT);
         String base64Creds = new String(base64CredsBytes);
         headers.add(HttpHeaders.AUTHORIZATION, "Basic " + base64Creds);
 
@@ -59,7 +61,7 @@ public class UserRestClient {
             restTemplate.exchange(
                     BASE_URL + idUserFs + "/logout", HttpMethod.POST, request, Object.class);
         } catch (Exception e) {
-            Log.e("Users:", "erro ao fazer POST de UserLocationHistory.", e);
+            Log.e(TAG, "erro ao fazer POST de UserLocationHistory.", e);
             throw e;
         }
     }
@@ -69,7 +71,7 @@ public class UserRestClient {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         String plainCreds = "web.mobile:wm12345";
         byte[] plainCredsBytes = plainCreds.getBytes();
-        byte[] base64CredsBytes = Base64.encode(plainCredsBytes,Base64.DEFAULT);
+        byte[] base64CredsBytes = Base64.encode(plainCredsBytes, Base64.DEFAULT);
         String base64Creds = new String(base64CredsBytes);
         headers.add(HttpHeaders.AUTHORIZATION, "Basic " + base64Creds);
         headers.add("login", mEmail);
@@ -80,9 +82,9 @@ public class UserRestClient {
             return restTemplate.exchange(
                     BASE_URL + "login", HttpMethod.GET, entity,
                     new ParameterizedTypeReference<UserFs>() {
-            }).getBody();
+                    }).getBody();
         } catch (Exception e) {
-            Log.e("Users:", "erro ao fazer login", e);
+            Log.e(TAG, "erro ao fazer login", e);
             throw e;
         }
     }

@@ -37,8 +37,9 @@ import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class TicketListActivity extends AppCompatActivity  {
+public class TicketListActivity extends AppCompatActivity {
 
+    private static final String TAG = TicketListActivity.class.getSimpleName();
 
     private EnviarLocalizacaoRunnable enviarLocalizacaoRunnable;
     private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
@@ -75,7 +76,7 @@ public class TicketListActivity extends AppCompatActivity  {
         }
 
         BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
-        Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
+        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
         buscaTicketsAsync.execute();
 
         enviarLocalizacaoHandlerThread = new EnviarLocalizacaoHandlerThread();
@@ -95,7 +96,7 @@ public class TicketListActivity extends AppCompatActivity  {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new TicketListAdapter(this , mTickets));
+        recyclerView.setAdapter(new TicketListAdapter(this, mTickets));
     }
 
     @Override
@@ -107,9 +108,7 @@ public class TicketListActivity extends AppCompatActivity  {
 
     @Override
     protected void onDestroy() {
-        enviarLocalizacaoRunnable.stop();
-        enviarLocalizacaoHandlerThread.quit();
-        //logoff();
+
         super.onDestroy();
     }
 
@@ -122,6 +121,8 @@ public class TicketListActivity extends AppCompatActivity  {
         int id = item.getItemId();
         if (id == R.id.action_logout) {
             logoff();
+            enviarLocalizacaoRunnable.stop();
+            enviarLocalizacaoHandlerThread.quit();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -135,7 +136,7 @@ public class TicketListActivity extends AppCompatActivity  {
                 Long idUserFs = settings.getLong("idUserFsLogged", 0L);
                 mTickets = ticketRestClient.findByidUserLogged(idUserFs);
             } catch (Exception e) {
-                Log.e("mTickets", "Erro ao buscar mTickets", e);
+                Log.e(TAG, "Erro ao buscar mTickets", e);
             }
             return mTickets;
         }
@@ -143,13 +144,13 @@ public class TicketListActivity extends AppCompatActivity  {
         @Override
         protected void onPostExecute(List<Ticket> tickets) {
             if (tickets != null && !tickets.isEmpty()) {
-                Log.i("mTickets", tickets.toString());
+                Log.i(TAG, tickets.toString());
                 View recyclerView = findViewById(R.id.ticket_list);
                 assert recyclerView != null;
                 setupRecyclerView((RecyclerView) recyclerView);
             } else {
                 Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
-                Log.i("mTickets", "Nenhum ticket encontrado.");
+                Log.i(TAG, "Nenhum ticket encontrado.");
             }
         }
     }
@@ -158,7 +159,7 @@ public class TicketListActivity extends AppCompatActivity  {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Long idUserFs = settings.getLong("idUserFsLogged", 0L);
         LogoutTecnicoAsync logoutTecnicoAsync = new LogoutTecnicoAsync();
-        Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
+        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
         logoutTecnicoAsync.execute(String.valueOf(idUserFs));
     }
 
@@ -168,16 +169,15 @@ public class TicketListActivity extends AppCompatActivity  {
         protected Void doInBackground(String... params) {
             try {
                 userRestClient.postLogoff(params[0]);
-                Log.i("LOGOUT", "idUserFs: "+ params[0]);
+                Log.i(TAG, "idUserFs: " + params[0]);
             } catch (Exception e) {
-                Log.e("GPS", "Erro ao executar logoff do tecnico.", e);
+                Log.e(TAG, "Erro ao executar logoff do tecnico.", e);
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void ticket) {
-            //Toast.makeText(TicketListActivity.this, "Fechando Sistema", Toast.LENGTH_SHORT).show();
             finish();
         }
     }

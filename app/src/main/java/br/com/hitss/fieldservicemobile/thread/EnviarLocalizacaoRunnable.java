@@ -1,8 +1,11 @@
 package br.com.hitss.fieldservicemobile.thread;
 
 import android.content.Context;
+import android.util.Log;
 
 public class EnviarLocalizacaoRunnable implements Runnable {
+
+    private static final String TAG = EnviarLocalizacaoRunnable.class.getSimpleName();
 
     private int delayEnvioLocalizacao;
     private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
@@ -11,11 +14,11 @@ public class EnviarLocalizacaoRunnable implements Runnable {
     private Long idUSerFsLogged;
     private Context context;
 
-    public EnviarLocalizacaoRunnable(EnviarLocalizacaoHandlerThread postOffice, Context context) {
-        enviarLocalizacaoHandlerThread = postOffice;
+    public EnviarLocalizacaoRunnable(EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread, Context context) {
+        this.enviarLocalizacaoHandlerThread = enviarLocalizacaoHandlerThread;
+        this.context = context;
         mThread = new Thread(this);
         controller = true;
-        this.context = context;
     }
 
     public synchronized void start() {
@@ -28,14 +31,15 @@ public class EnviarLocalizacaoRunnable implements Runnable {
         controller = true;
         while (controller) {
             try {
+                Log.i(TAG, "Enviando Localizacao idUserFs: " + idUSerFsLogged);
                 enviarLocalizacaoHandlerThread.sendLocation(idUSerFsLogged, context);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Erro ao enviar Localizacao idUSerFs: " + idUSerFsLogged, e);
             }
             try {
                 Thread.sleep(delayEnvioLocalizacao);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Erro dormir Thread idUSerFs: " + idUSerFsLogged, e);
             }
         }
     }

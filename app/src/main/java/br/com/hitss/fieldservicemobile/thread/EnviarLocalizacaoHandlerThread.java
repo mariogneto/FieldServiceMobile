@@ -28,11 +28,11 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
                     @Override
                     public void handleMessage(Message msg) {
                         EnviaPosicaoTecnicoAsync enviaPosicaoTecnicoAsync = new EnviaPosicaoTecnicoAsync();
-                        Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
+                        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
                         GPSTracker gpsTracker = new GPSTracker(context);
                         Location location = gpsTracker.getLocation();
                         enviaPosicaoTecnicoAsync.execute(String.valueOf(idUserFsLogged), String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
-                        Log.i("THREAD", "Contador: " + count++);
+                        Log.i(TAG, "Contador: " + count++);
                     }
                 };
 
@@ -45,11 +45,17 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
         protected Void doInBackground(String... params) {
             try {
                 userRestClient.postUserLocationHistory(params[0], Double.valueOf(params[1]), Double.valueOf(params[2]));
-                Log.i("GPS", "idUserFs: "+ params[0] +"  latitude: " + params[1] + "longitude: " + params[2]);
+                Log.i(TAG, "idUserFs: "+ params[0] +"  latitude: " + params[1] + "longitude: " + params[2]);
             } catch (Exception e) {
-                Log.e("GPS", "Erro ao enviar posicao tecnico.", e);
+                Log.e(TAG, "Erro ao enviar posicao tecnico.", e);
             }
             return null;
         }
     }
+
+    @Override
+    public boolean quit() {
+        return super.quit();
+    }
+
 }

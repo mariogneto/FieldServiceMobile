@@ -1,16 +1,14 @@
 package br.com.hitss.fieldservicemobile;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
-import android.view.MenuItem;
 import android.widget.TextView;
 
 import br.com.hitss.fieldservicemobile.model.Ticket;
@@ -23,6 +21,8 @@ import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
  * in a {@link TicketListActivity}.
  */
 public class TicketDetailActivity extends AppCompatActivity {
+
+    private static final String TAG = TicketDetailActivity.class.getSimpleName();
 
     public static final String ARG_ITEM_ID = "ticket_id";
 
@@ -63,13 +63,13 @@ public class TicketDetailActivity extends AppCompatActivity {
             if (extras != null) {
                 String idTicket = (String) extras.get(ARG_ITEM_ID);
                 BuscaTicketAsync buscaTicketsAsync = new BuscaTicketAsync();
-                Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
+                Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
                 buscaTicketsAsync.execute(idTicket);
             }
         } else {
             String idTicket = (String) savedInstanceState.getSerializable(ARG_ITEM_ID);
             BuscaTicketAsync buscaTicketsAsync = new BuscaTicketAsync();
-            Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
+            Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
             buscaTicketsAsync.execute(idTicket);
         }
     }
@@ -80,7 +80,7 @@ public class TicketDetailActivity extends AppCompatActivity {
             try {
                 mTicket = ticketRestClient.findById(Long.valueOf(params[0]));
             } catch (Exception e) {
-                Log.e("tickets", "Erro ao buscar ticket", e);
+                Log.e(TAG, "Erro ao buscar ticket", e);
             }
             return mTicket;
         }
@@ -89,14 +89,14 @@ public class TicketDetailActivity extends AppCompatActivity {
         protected void onPostExecute(Ticket ticket) {
             super.onPostExecute(ticket);
             if (mTicket != null) {
-                Log.i("ticket", mTicket.toString());
+                Log.i(TAG, mTicket.toString());
                 if (mTicket != null) {
                     setTitle(mTicket.getPartnerTicketCode());
                     ticketDescricao.setText(mTicket.getProblemDescription());
                     ticketEmpresaSolicitante.setText(mTicket.getUserAffected().getLocation().getCustomer().getName());
                 }
             } else {
-                Log.i("ticket", "vazio!");
+                Log.i(TAG, "vazio!");
             }
         }
     }

@@ -13,9 +13,12 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 import java.util.List;
 
+import br.com.hitss.fieldservicemobile.TicketDetailActivity;
 import br.com.hitss.fieldservicemobile.model.Ticket;
 
 public class TicketRestClient {
+
+    private static final String TAG = TicketRestClient.class.getSimpleName();
 
     private String BASE_URL = "http://10.172.16.78:7080/fieldservice/v1/tickets/";
     private RestTemplate restTemplate;
@@ -44,8 +47,8 @@ public class TicketRestClient {
                     new ParameterizedTypeReference<Ticket>() {
                     }).getBody();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            Log.e(TAG, "Erro ao buscar ticket", e);
+            throw e;
         }
     }
 
@@ -69,7 +72,7 @@ public class TicketRestClient {
                     new ParameterizedTypeReference<List<Ticket>>() {
                     }).getBody();
         } catch (Exception e) {
-            Log.e("Users:", "Erro ao buscar tickets", e);
+            Log.e(TAG, "Erro ao buscar tickets", e);
             throw e;
         }
     }

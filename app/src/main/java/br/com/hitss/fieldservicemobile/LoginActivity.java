@@ -25,6 +25,8 @@ import br.com.hitss.fieldservicemobile.util.GPSTracker;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = TicketDetailActivity.class.getSimpleName();
+
     private EditText editTextLogin;
     private EditText editTextPassword;
     private TextView textViewInfo;
@@ -53,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final BuscaUserAsync buscaTicketsAsync = new BuscaUserAsync();
-                Log.i("AsyncTask", "AsyncTask senado chamado Thread: " + Thread.currentThread().getName());
+                Log.i(TAG, "AsyncTask senado chamado Thread: " + Thread.currentThread().getName());
                 buscaTicketsAsync.execute(editTextLogin.getText().toString(), editTextPassword.getText().toString());
                 buttonLogin.setEnabled(false);
 
@@ -104,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
     private class BuscaUserAsync extends AsyncTask<String, Void, UserFs> {
         @Override
         protected void onPreExecute() {
-            Log.i("Users:", "Buscando user");
+            Log.i(TAG, "Buscando user");
         }
 
         @Override
@@ -112,7 +114,7 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 user = userRestClient.login(params[0],params[1]);
             } catch (Exception e) {
-                Log.e("Users:", "Erro ao buscar tickets", e);
+                Log.e(TAG, "Erro ao buscar tickets", e);
                 throw e;
             }
             return user;
@@ -121,7 +123,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(UserFs user) {
             if (user != null) {
-                Log.i("Users:", user.getLogin());
+                Log.i(TAG, user.getLogin());
                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("idUserFsLogged", user.getIdUserFs());
@@ -130,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             } else {
-                Log.i("Users:", "não encontrado.");
+                Log.i(TAG, "não encontrado.");
                 counter--;
                 textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(counter)));
                 buttonLogin.setEnabled(true);
