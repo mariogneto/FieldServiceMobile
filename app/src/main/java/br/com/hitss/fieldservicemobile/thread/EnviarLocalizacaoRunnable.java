@@ -1,49 +1,21 @@
 package br.com.hitss.fieldservicemobile.thread;
 
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
-
-import java.lang.ref.WeakReference;
-import java.util.Random;
+import android.content.Context;
 
 public class EnviarLocalizacaoRunnable implements Runnable {
+
     private int delayEnvioLocalizacao;
-    private PostOfficeHandlerThread postOfficeHandlerThread;
-    private Client.ClientCallback mCallback;
-    private Random mRandom;
+    private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
     private Thread mThread;
     private boolean controller;
+    private Long idUSerFsLogged;
+    private Context context;
 
-    public EnviarLocalizacaoRunnable(PostOfficeHandlerThread postOffice, Client.ClientCallback callback) {
-        postOfficeHandlerThread = postOffice;
-        mCallback = callback;
-        mRandom = new Random(System.currentTimeMillis());
+    public EnviarLocalizacaoRunnable(EnviarLocalizacaoHandlerThread postOffice, Context context) {
+        enviarLocalizacaoHandlerThread = postOffice;
         mThread = new Thread(this);
         controller = true;
-    }
-
-    int count = 0;
-    public EnviarLocalizacaoRunnable enviarLocalizacao(int millis) {
-            try {
-
-                HandlerThread handlerThread = new HandlerThread("MyHandlerThread");
-                handlerThread.start();
-                Looper looper = handlerThread.getLooper();
-                Handler handler =
-                        new Handler(looper) {
-                            @Override
-                            public void handleMessage(Message msg) {
-                                Log.i("THREAD", "Contador: " + count++);
-                            }
-                        };
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        return this;
+        this.context = context;
     }
 
     public synchronized void start() {
@@ -55,13 +27,11 @@ public class EnviarLocalizacaoRunnable implements Runnable {
     public void run() {
         controller = true;
         while (controller) {
-
             try {
-                postOfficeHandlerThread.sendPost2(new Post());
+                enviarLocalizacaoHandlerThread.sendLocation(idUSerFsLogged, context);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             try {
                 Thread.sleep(delayEnvioLocalizacao);
             } catch (InterruptedException e) {
@@ -70,13 +40,20 @@ public class EnviarLocalizacaoRunnable implements Runnable {
         }
     }
 
-
     public void stop() {
         controller = false;
-        Client.disposeAll();
     }
 
     public void setDelayEnvioLocalizacao(int delayEnvioLocalizacao) {
         this.delayEnvioLocalizacao = delayEnvioLocalizacao;
     }
+
+    public Long getIdUSerFsLogged() {
+        return idUSerFsLogged;
+    }
+
+    public void setIdUSerFsLogged(Long idUSerFsLogged) {
+        this.idUSerFsLogged = idUSerFsLogged;
+    }
+
 }

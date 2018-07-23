@@ -1,10 +1,8 @@
 package br.com.hitss.fieldservicemobile;
 
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,17 +20,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
 import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
 import br.com.hitss.fieldservicemobile.rest.UserRestClient;
-import br.com.hitss.fieldservicemobile.thread.Client;
-import br.com.hitss.fieldservicemobile.thread.PostOfficeHandlerThread;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
-import br.com.hitss.fieldservicemobile.util.GPSTracker;
+import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
 
 /**
  * An activity representing a list of Tickets. This activity
@@ -42,11 +37,11 @@ import br.com.hitss.fieldservicemobile.util.GPSTracker;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class TicketListActivity extends AppCompatActivity implements Client.ClientCallback  {
+public class TicketListActivity extends AppCompatActivity  {
 
 
     private EnviarLocalizacaoRunnable enviarLocalizacaoRunnable;
-    private PostOfficeHandlerThread postOfficeHandlerThread;
+    private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
 
     private static final String PREFS_NAME = "PrefsUser";
 
@@ -54,7 +49,6 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
     private UserRestClient userRestClient = new UserRestClient();
 
     private List<Ticket> mTickets = new ArrayList<>();
-    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,60 +74,24 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        /*BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
+        BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
         Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
         buscaTicketsAsync.execute();
 
-        enviaLocalizacaoUsuarioLogado();*/
-
-        postOfficeHandlerThread = new PostOfficeHandlerThread(new LinkedHashMap<Integer, Handler>());
-        postOfficeHandlerThread.start();
-        enviarLocalizacaoRunnable = new EnviarLocalizacaoRunnable(postOfficeHandlerThread, this);
-        //enviarLocalizacaoRunnable.createClients(10).start();
+        enviarLocalizacaoHandlerThread = new EnviarLocalizacaoHandlerThread();
+        enviarLocalizacaoHandlerThread.start();
+        enviarLocalizacaoRunnable = new EnviarLocalizacaoRunnable(enviarLocalizacaoHandlerThread, this);
         enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(100);
-        enviarLocalizacaoRunnable.enviarLocalizacao(2).start();
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        enviarLocalizacaoRunnable.setIdUSerFsLogged(settings.getLong("idUserFsLogged", 0L));
 
+        enviarLocalizacaoRunnable.start();
     }
 
     @Override
     public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onPostCreate(savedInstanceState);
 
-    }
-
-    @Override
-    public void onNewPost(final Client receiver, final Client sender, final String message) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-               /* int position = mPostListAdapter.getFeedItemList().size();
-                mPostListAdapter.getFeedItemList()
-                        .add(new PostListAdapter.FeedItem(sender.getName(), receiver.getName(), message));
-                mPostFeedView.getAdapter().notifyItemInserted(position);
-                mPostFeedView.smoothScrollToPosition(position);*/
-                Toast.makeText(TicketListActivity.this, "THREAD...", Toast.LENGTH_LONG).show();
-
-                Log.i("THREAD", "Contador " + count++);
-            }
-        });
-    }
-
-    public void enviaLocalizacaoUsuarioLogado() {
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(TicketListActivity.this, "THREAD...", Toast.LENGTH_LONG).show();
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                Long idUserFs = settings.getLong("idUserFsLogger", 0L);
-                EnviaPosicaoTecnicoAsync enviaPosicaoTecnicoAsync = new EnviaPosicaoTecnicoAsync();
-                Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
-                GPSTracker gpsTracker = new GPSTracker(TicketListActivity.this);
-                Location location = gpsTracker.getLocation();
-                enviaPosicaoTecnicoAsync.execute(String.valueOf(idUserFs), String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
-            }
-        }, 3000);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -150,9 +108,8 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
     @Override
     protected void onDestroy() {
         enviarLocalizacaoRunnable.stop();
-        postOfficeHandlerThread.quit();
-
-        logoff();
+        enviarLocalizacaoHandlerThread.quit();
+        //logoff();
         super.onDestroy();
     }
 
@@ -175,7 +132,7 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
         protected List<Ticket> doInBackground(String... params) {
             try {
                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                Long idUserFs = settings.getLong("idUserFsLogger", 0L);
+                Long idUserFs = settings.getLong("idUserFsLogged", 0L);
                 mTickets = ticketRestClient.findByidUserLogged(idUserFs);
             } catch (Exception e) {
                 Log.e("mTickets", "Erro ao buscar mTickets", e);
@@ -197,28 +154,9 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
         }
     }
 
-    private class EnviaPosicaoTecnicoAsync extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-            try {
-                userRestClient.postUserLocationHistory(params[0], Double.valueOf(params[1]), Double.valueOf(params[2]));
-                Log.i("GPS", "idUserFs: "+ params[0] +"  latitude: " + params[1] + "longitude: " + params[2]);
-            } catch (Exception e) {
-                Log.e("GPS", "Erro ao enviar posicao tecnico.", e);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void ticket) {
-            Toast.makeText(TicketListActivity.this, "Envio de posicao", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     private void logoff() {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        Long idUserFs = settings.getLong("idUserFsLogger", 0L);
+        Long idUserFs = settings.getLong("idUserFsLogged", 0L);
         LogoutTecnicoAsync logoutTecnicoAsync = new LogoutTecnicoAsync();
         Log.i("AsyncTask", "AsyncTask Thread: " + Thread.currentThread().getName());
         logoutTecnicoAsync.execute(String.valueOf(idUserFs));
@@ -239,7 +177,7 @@ public class TicketListActivity extends AppCompatActivity implements Client.Clie
 
         @Override
         protected void onPostExecute(Void ticket) {
-            Toast.makeText(TicketListActivity.this, "Fechando Sistema", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(TicketListActivity.this, "Fechando Sistema", Toast.LENGTH_SHORT).show();
             finish();
         }
     }

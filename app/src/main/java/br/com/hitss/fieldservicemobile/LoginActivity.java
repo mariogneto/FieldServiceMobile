@@ -124,7 +124,7 @@ public class LoginActivity extends AppCompatActivity {
                 Log.i("Users:", user.getLogin());
                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("idUserFsLogger", user.getIdUserFs());
+                editor.putLong("idUserFsLogged", user.getIdUserFs());
                 editor.commit();
                 Intent intent = new Intent(LoginActivity.this, TicketListActivity.class);
                 startActivity(intent);
