@@ -18,7 +18,7 @@ import br.com.hitss.fieldservicemobile.model.Ticket;
 
 public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.ViewHolder> {
 
-    private final List<Ticket> mValues;
+    private final List<Ticket> mTickets;
 
     private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -31,8 +31,8 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
         }
     };
 
-    public TicketListAdapter(TicketListActivity parent, List<Ticket> items) {
-        mValues = items;
+    public TicketListAdapter(TicketListActivity parent, List<Ticket> tickets) {
+        mTickets = tickets;
     }
 
     @Override
@@ -44,26 +44,28 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.mIdView.setText(String.valueOf(mValues.get(position).getIdTicket()));
-        holder.mContentView.setText(mValues.get(position).getProblemLocalDetail());
-        holder.itemView.setTag(mValues.get(position));
+        holder.mIdTicket.setText(String.valueOf(mTickets.get(position).getIdTicket()));
+        holder.mdetail.setText(mTickets.get(position).getProblemLocalDetail());
+        holder.mStatus.setText(mTickets.get(position).getTicketStatus().getName());
+        holder.itemView.setTag(mTickets.get(position));
         holder.itemView.setOnClickListener(mOnClickListener);
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mTickets.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView mIdView;
-        final TextView mContentView;
+        final TextView mIdTicket;
+        final TextView mdetail;
+        final TextView mStatus;
 
         ViewHolder(View view) {
             super(view);
-            mIdView = (TextView) view.findViewById(R.id.id_text);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mIdTicket = (TextView) view.findViewById(R.id.ticket_list_id_ticket);
+            mdetail = (TextView) view.findViewById(R.id.ticket_list_detail);
+            mStatus = (TextView) view.findViewById(R.id.ticket_list_status);
         }
     }
 }
-

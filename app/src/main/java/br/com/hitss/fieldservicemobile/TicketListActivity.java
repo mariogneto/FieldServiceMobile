@@ -3,9 +3,7 @@ package br.com.hitss.fieldservicemobile;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -26,8 +24,8 @@ import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
 import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
 import br.com.hitss.fieldservicemobile.rest.UserRestClient;
-import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
+import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
 
 /**
  * An activity representing a list of Tickets. This activity
@@ -51,6 +49,10 @@ public class TicketListActivity extends AppCompatActivity {
 
     private List<Ticket> mTickets = new ArrayList<>();
 
+    private boolean buscarTicketsBackground = true;
+
+    private int delayListarTickets = 5000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,9 +66,9 @@ public class TicketListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Buscando tickets...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(4000);
+                loadTicketList();
             }
         });
         // Show the Up button in the action bar.
@@ -75,27 +77,39 @@ public class TicketListActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
-        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
-        buscaTicketsAsync.execute();
+        new Thread(new Runnable() {
+            public void run() {
+                while (true) {
+                    if (buscarTicketsBackground)
+                        loadTicketList();
+                    try {
+                        Thread.sleep(delayListarTickets);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
 
         enviarLocalizacaoHandlerThread = new EnviarLocalizacaoHandlerThread();
         enviarLocalizacaoHandlerThread.start();
         enviarLocalizacaoRunnable = new EnviarLocalizacaoRunnable(enviarLocalizacaoHandlerThread, this);
-        enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(500);
+        enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(5000);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         enviarLocalizacaoRunnable.setIdUSerFsLogged(settings.getLong("idUserFsLogged", 0L));
 
         enviarLocalizacaoRunnable.start();
     }
 
-    @Override
-    public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
-        super.onPostCreate(savedInstanceState);
-
+    public void loadTicketList(){
+        BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
+        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
+        buscaTicketsAsync.execute();
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
+        if(mTickets == null)
+            mTickets = new ArrayList<Ticket>();
         recyclerView.setAdapter(new TicketListAdapter(this, mTickets));
     }
 
@@ -107,24 +121,8 @@ public class TicketListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-    }
-
-    @Override
     protected void onStart() {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        Boolean isWorking = settings.getBoolean("isWorking", false);
-        if(isWorking){
-            enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(3000);
-        } else {
-            enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(500);
-        }
+        buscarTicketsBackground = true;
         super.onStart();
     }
 
@@ -156,17 +154,20 @@ public class TicketListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<Ticket> tickets) {
             SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            RecyclerView ticketListRecyclerView = (RecyclerView) findViewById(R.id.ticket_list);
+            assert ticketListRecyclerView != null;
+            setupRecyclerView(ticketListRecyclerView);
+
             if (tickets != null && !tickets.isEmpty()) {
                 Log.i(TAG, tickets.toString());
-                View recyclerView = findViewById(R.id.ticket_list);
-                assert recyclerView != null;
-                setupRecyclerView((RecyclerView) recyclerView);
+                buscarTicketsBackground = false;
             } else {
                 Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("isWorking", true);
                 Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
                 Log.i(TAG, "Nenhum ticket encontrado.");
+                buscarTicketsBackground = true;
             }
         }
     }
@@ -188,6 +189,7 @@ public class TicketListActivity extends AppCompatActivity {
                 Log.i(TAG, "idUserFs: " + params[0]);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao executar logoff do tecnico.", e);
+                throw e;
             }
             return null;
         }
