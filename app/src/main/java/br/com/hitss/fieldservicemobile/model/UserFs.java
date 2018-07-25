@@ -155,7 +155,7 @@ public class UserFs implements Serializable {
 
 	public void addTimeRecordings(TimeRecording timeRcording) {
 		if (this.timeRecordings == null) {
-			this.timeRecordings = new ArrayList<TimeRecording>();
+			this.timeRecordings = new ArrayList<>();
 		}
 		this.timeRecordings.add(timeRcording);
 	}

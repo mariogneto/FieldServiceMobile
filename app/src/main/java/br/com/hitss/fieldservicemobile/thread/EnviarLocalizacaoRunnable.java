@@ -52,11 +52,7 @@ public class EnviarLocalizacaoRunnable implements Runnable {
         this.delayEnvioLocalizacao = delayEnvioLocalizacao;
     }
 
-    public Long getIdUSerFsLogged() {
-        return idUSerFsLogged;
-    }
-
-    public void setIdUSerFsLogged(Long idUSerFsLogged) {
+     public void setIdUSerFsLogged(Long idUSerFsLogged) {
         this.idUSerFsLogged = idUSerFsLogged;
     }
 

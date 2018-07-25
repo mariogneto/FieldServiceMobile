@@ -106,8 +106,7 @@ public class TicketDetailActivity extends AppCompatActivity {
 
                     switch (mTicket.getTicketStatus().getName()) {
                         case "ASSIGNED":
-                            buttonTicketWorkflow.setText("A CAMINHO");
-                            buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#1E90FF"));
+                            buttonTicketWorkflow.setVisibility(View.INVISIBLE);
                             break;
                         case "ON_THE_WAY":
                             buttonTicketWorkflow.setText("TRABALHAR");

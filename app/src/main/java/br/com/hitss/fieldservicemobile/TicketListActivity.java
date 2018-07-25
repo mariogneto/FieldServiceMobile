@@ -58,11 +58,11 @@ public class TicketListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -109,7 +109,7 @@ public class TicketListActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         if(mTickets == null)
-            mTickets = new ArrayList<Ticket>();
+            mTickets = new ArrayList<>();
         recyclerView.setAdapter(new TicketListAdapter(this, mTickets));
     }
 
@@ -154,7 +154,7 @@ public class TicketListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<Ticket> tickets) {
             SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-            RecyclerView ticketListRecyclerView = (RecyclerView) findViewById(R.id.ticket_list);
+            RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list);
             assert ticketListRecyclerView != null;
             setupRecyclerView(ticketListRecyclerView);
 

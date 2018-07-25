@@ -53,9 +53,4 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
         }
     }
 
-    @Override
-    public boolean quit() {
-        return super.quit();
-    }
-
 }

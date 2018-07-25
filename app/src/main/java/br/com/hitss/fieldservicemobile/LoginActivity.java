@@ -43,10 +43,10 @@ public class LoginActivity extends AppCompatActivity {
         onPermision();
         setContentView(R.layout.activity_login);
 
-        editTextLogin = (EditText) findViewById(R.id.etLogin);
-        editTextPassword = (EditText) findViewById(R.id.etPassword);
-        textViewInfo = (TextView) findViewById(R.id.tvInfo);
-        buttonLogin = (Button) findViewById(R.id.btnLogin);
+        editTextLogin = findViewById(R.id.etLogin);
+        editTextPassword = findViewById(R.id.etPassword);
+        textViewInfo = findViewById(R.id.tvInfo);
+        buttonLogin = findViewById(R.id.btnLogin);
         textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(3)));
 
         GPSTracker gpsTracker = new GPSTracker(LoginActivity.this);
