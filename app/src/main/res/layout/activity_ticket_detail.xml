@@ -41,31 +41,10 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" >
-
-            <TextView
-                android:id="@+id/ticket_descricao"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="descricao @string/title_ticket_detail" />
-
-            <TextView
-                android:id="@+id/ticket_empresa_solicitante"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="claro"
-                tools:layout_editor_absoluteX="0dp"
-                tools:layout_editor_absoluteY="29dp" />
-
-            <Button
-                android:id="@+id/btn_ticket_workflow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-        </LinearLayout>
+        <include
+            layout="@layout/ticket_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton

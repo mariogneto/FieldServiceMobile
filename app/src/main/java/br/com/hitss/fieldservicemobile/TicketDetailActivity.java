@@ -1,6 +1,7 @@
 package br.com.hitss.fieldservicemobile;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -44,11 +45,11 @@ public class TicketDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket_detail);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+        Toolbar toolbar = findViewById(R.id.detail_toolbar);
         toolbar.setSubtitle("SubTest");
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -62,9 +63,9 @@ public class TicketDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        ticketDescricao = (TextView) findViewById(R.id.ticket_descricao);
-        ticketEmpresaSolicitante = (TextView) findViewById(R.id.ticket_empresa_solicitante);
-        buttonTicketWorkflow = (Button) findViewById(R.id.btn_ticket_workflow);
+        ticketDescricao = findViewById(R.id.ticket_descricao);
+        ticketEmpresaSolicitante = findViewById(R.id.ticket_empresa_solicitante);
+        buttonTicketWorkflow = findViewById(R.id.btn_ticket_workflow);
 
         if (savedInstanceState == null) {
             Bundle extras = this.getIntent().getExtras();
@@ -88,7 +89,7 @@ public class TicketDetailActivity extends AppCompatActivity {
             try {
                 mTicket = ticketRestClient.findById(Long.valueOf(params[0]));
             } catch (Exception e) {
-                Log.e(TAG, "Erro ao buscar ticket", e);
+                Log.e(TAG, "Erro ao buscar ticket.", e);
             }
             return mTicket;
         }
@@ -103,16 +104,18 @@ public class TicketDetailActivity extends AppCompatActivity {
                     ticketDescricao.setText(mTicket.getProblemDescription());
                     ticketEmpresaSolicitante.setText(mTicket.getUserAffected().getLocation().getCustomer().getName());
 
-                    //muda texto do botao
                     switch (mTicket.getTicketStatus().getName()) {
                         case "ASSIGNED":
                             buttonTicketWorkflow.setText("A CAMINHO");
+                            buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#1E90FF"));
                             break;
                         case "ON_THE_WAY":
                             buttonTicketWorkflow.setText("TRABALHAR");
+                            buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#32CD32"));
                             break;
                         case "IN_PROGRESS":
                             buttonTicketWorkflow.setText("RESOLVER");
+                            buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#FF0000"));
                             break;
                         case "CLOSED":
                             buttonTicketWorkflow.setVisibility(View.INVISIBLE);
@@ -141,6 +144,7 @@ public class TicketDetailActivity extends AppCompatActivity {
                                     editor.putBoolean("isWorking", true);
                                     break;
                               default:
+                                  editor.apply();
                                   editor.commit();
                             }
                         }

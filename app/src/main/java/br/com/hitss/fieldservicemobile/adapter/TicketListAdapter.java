@@ -59,7 +59,7 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
                 break;
             case "IN_PROGRESS":
                 holder.mStatus.setText("PRO");
-                holder.mStatus.setBackgroundColor(Color.parseColor("#ADFF2F"));
+                holder.mStatus.setBackgroundColor(Color.parseColor("#32CD32"));
                 break;
             default:
                 holder.mStatus.setBackgroundColor(Color.parseColor("#D3D3D3"));
