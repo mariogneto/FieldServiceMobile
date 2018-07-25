@@ -105,18 +105,17 @@ public class TicketDetailActivity extends AppCompatActivity {
                     ticketEmpresaSolicitante.setText(mTicket.getUserAffected().getLocation().getCustomer().getName());
 
                     switch (mTicket.getTicketStatus().getName()) {
-                        case "ASSIGNED":
-                            buttonTicketWorkflow.setVisibility(View.INVISIBLE);
-                            break;
                         case "ON_THE_WAY":
                             buttonTicketWorkflow.setText("TRABALHAR");
                             buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#32CD32"));
+                            buttonTicketWorkflow.setVisibility(View.VISIBLE);
                             break;
                         case "IN_PROGRESS":
                             buttonTicketWorkflow.setText("RESOLVER");
                             buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#FF0000"));
+                            buttonTicketWorkflow.setVisibility(View.VISIBLE);
                             break;
-                        case "CLOSED":
+                        default:
                             buttonTicketWorkflow.setVisibility(View.INVISIBLE);
                             break;
                     }
