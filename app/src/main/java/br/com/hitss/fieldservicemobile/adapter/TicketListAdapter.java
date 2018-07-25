@@ -2,6 +2,7 @@ package br.com.hitss.fieldservicemobile.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -35,8 +36,8 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
         mTickets = tickets;
     }
 
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    @NonNull
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.ticket_list_content, parent, false);
         return new ViewHolder(view);
@@ -44,9 +45,26 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.mIdTicket.setText(String.valueOf(mTickets.get(position).getIdTicket()));
-        holder.mdetail.setText(mTickets.get(position).getProblemLocalDetail());
-        holder.mStatus.setText(mTickets.get(position).getTicketStatus().getName());
+        holder.mPartnerTicket.setText(String.valueOf(mTickets.get(position).getPartnerTicketCode()));
+        holder.mDetail.setText(mTickets.get(position).getUserAffected().getLocation().getCustomer().getName());
+
+        switch (mTickets.get(position).getTicketStatus().getName()) {
+            case "ASSIGNED":
+                holder.mStatus.setText("ATR");
+                holder.mStatus.setBackgroundColor(Color.parseColor("#FFFF00"));
+                break;
+            case "ON_THE_WAY":
+                holder.mStatus.setText("CAM");
+                holder.mStatus.setBackgroundColor(Color.parseColor("#1E90FF"));
+                break;
+            case "IN_PROGRESS":
+                holder.mStatus.setText("PRO");
+                holder.mStatus.setBackgroundColor(Color.parseColor("#ADFF2F"));
+                break;
+            default:
+                holder.mStatus.setBackgroundColor(Color.parseColor("#D3D3D3"));
+                break;
+        }
         holder.itemView.setTag(mTickets.get(position));
         holder.itemView.setOnClickListener(mOnClickListener);
     }
@@ -57,15 +75,15 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView mIdTicket;
-        final TextView mdetail;
+        final TextView mPartnerTicket;
+        final TextView mDetail;
         final TextView mStatus;
 
         ViewHolder(View view) {
             super(view);
-            mIdTicket = (TextView) view.findViewById(R.id.ticket_list_id_ticket);
-            mdetail = (TextView) view.findViewById(R.id.ticket_list_detail);
-            mStatus = (TextView) view.findViewById(R.id.ticket_list_status);
+            mPartnerTicket = view.findViewById(R.id.ticket_list_partner_ticket);
+            mDetail = view.findViewById(R.id.ticket_list_detail);
+            mStatus = view.findViewById(R.id.ticket_list_status);
         }
     }
 }
