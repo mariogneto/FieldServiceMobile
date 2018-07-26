@@ -35,8 +35,6 @@ public class TicketDetailActivity extends AppCompatActivity {
 
     public static final String ARG_ITEM_ID = "ticket_id";
 
-    private Ticket mTicket;
-
     private TextView ticketDescricao;
     private TextView ticketPartnerCode;
     private TextView ticketEmpresaSolicitante;
@@ -107,28 +105,28 @@ public class TicketDetailActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(Ticket ticket) {
+        protected void onPostExecute(final Ticket ticket) {
             super.onPostExecute(ticket);
-            if (mTicket != null) {
-                Log.i(TAG, mTicket.toString());
-                if (mTicket != null) {
-                    setTitle(mTicket.getPartnerTicketCode());
-                    ticketPartnerCode.setText(mTicket.getPartnerTicketCode());
-                    ticketDescricao.setText(mTicket.getProblemDescription());
-                    String ticketEnderecoText = mTicket.getUserAffected().getLocation().getAddress() + "," +
-                            mTicket.getUserAffected().getLocation().getNumber() + " - " +
-                            mTicket.getUserAffected().getLocation().getNeighborhood() + ", " +
-                            mTicket.getUserAffected().getLocation().getCity() + "-" + mTicket.getUserAffected().getLocation().getState() + " " + mTicket.getUserAffected().getLocation().getZipCode();
+            if (ticket != null) {
+                Log.i(TAG, ticket.toString());
+                if (ticket != null) {
+                    setTitle(ticket.getPartnerTicketCode());
+                    ticketPartnerCode.setText(ticket.getPartnerTicketCode());
+                    ticketDescricao.setText(ticket.getProblemDescription());
+                    String ticketEnderecoText = ticket.getUserAffected().getLocation().getAddress() + "," +
+                            ticket.getUserAffected().getLocation().getNumber() + " - " +
+                            ticket.getUserAffected().getLocation().getNeighborhood() + ", " +
+                            ticket.getUserAffected().getLocation().getCity() + "-" + ticket.getUserAffected().getLocation().getState() + " " + ticket.getUserAffected().getLocation().getZipCode();
                     ticketEndereco.setText(ticketEnderecoText);
-                    ticketResponsavel.setText(mTicket.getUserAffected().getFullName());
-                    String ticketEmpresaSolicitanteText = mTicket.getUserAffected().getLocation().getCustomer().getName() + " - " +
-                            mTicket.getUserAffected().getLocation().getName();
+                    ticketResponsavel.setText(ticket.getUserAffected().getFullName());
+                    String ticketEmpresaSolicitanteText = ticket.getUserAffected().getLocation().getCustomer().getName() + " - " +
+                            ticket.getUserAffected().getLocation().getName();
                     ticketEmpresaSolicitante.setText(ticketEmpresaSolicitanteText);
                     SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt","BR"));
-                    ticketSla.setText(f.format(mTicket.getSla()));
-                    ticketDataAgendamento.setText(f.format(mTicket.getDateScheduling()));
+                    ticketSla.setText(f.format(ticket.getSla()));
+                    ticketDataAgendamento.setText(f.format(ticket.getDateScheduling()));
 
-                    switch (mTicket.getTicketStatus().getName()) {
+                    switch (ticket.getTicketStatus().getName()) {
                         case "ON_THE_WAY":
                             buttonTicketWorkflow.setText("TRABALHAR");
                             buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#32CD32"));
@@ -152,17 +150,17 @@ public class TicketDetailActivity extends AppCompatActivity {
                             PostHistoryByIdTicketAsync postHistoryByIdTicketAsync = new PostHistoryByIdTicketAsync();
                             Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
                             SharedPreferences.Editor editor = settings.edit();
-                            switch (mTicket.getTicketStatus().getName()) {
+                            switch (ticket.getTicketStatus().getName()) {
                                 case "ASSIGNED":
-                                    postHistoryByIdTicketAsync.execute(new TicketHistory(mTicket.getIdTicket(), mTicket.getUserTechnician().getIdUserFs(), idUserFs, "ON_THE_WAY", "PREENCHER..."));
+                                    postHistoryByIdTicketAsync.execute(new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "ON_THE_WAY", "PREENCHER..."));
                                     editor.putBoolean("isWorking", false);
                                     break;
                                 case "ON_THE_WAY":
-                                    postHistoryByIdTicketAsync.execute(new TicketHistory(mTicket.getIdTicket(), mTicket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", "PREENCHER..."));
+                                    postHistoryByIdTicketAsync.execute(new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", "PREENCHER..."));
                                     editor.putBoolean("isWorking", true);
                                     break;
                                 case "IN_PROGRESS":
-                                    postHistoryByIdTicketAsync.execute(new TicketHistory(mTicket.getIdTicket(), mTicket.getUserTechnician().getIdUserFs(), idUserFs, "CLOSED", "PREENCHER..."));
+                                    postHistoryByIdTicketAsync.execute(new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "CLOSED", "PREENCHER..."));
                                     editor.putBoolean("isWorking", true);
                                     break;
                               default:
