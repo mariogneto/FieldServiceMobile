@@ -14,6 +14,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import br.com.hitss.fieldservicemobile.model.Ticket;
 import br.com.hitss.fieldservicemobile.model.TicketHistory;
 import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
@@ -32,14 +35,18 @@ public class TicketDetailActivity extends AppCompatActivity {
 
     public static final String ARG_ITEM_ID = "ticket_id";
 
-    private TicketRestClient ticketRestClient = new TicketRestClient();
-
     private Ticket mTicket;
 
     private TextView ticketDescricao;
+    private TextView ticketPartnerCode;
     private TextView ticketEmpresaSolicitante;
+    private TextView ticketSla;
+    private TextView ticketEndereco;
+    private TextView ticketResponsavel;
+    private TextView ticketDataAgendamento;
 
     private Button buttonTicketWorkflow;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +70,13 @@ public class TicketDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        ticketDataAgendamento = findViewById(R.id.ticket_data_agendamento);
+        ticketEndereco = findViewById(R.id.ticket_endereco);
+        ticketPartnerCode = findViewById(R.id.ticket_partner_code);
+        ticketResponsavel = findViewById(R.id.ticket_responsavel);
         ticketDescricao = findViewById(R.id.ticket_descricao);
         ticketEmpresaSolicitante = findViewById(R.id.ticket_empresa_solicitante);
+        ticketSla = findViewById(R.id.ticket_sla);
         buttonTicketWorkflow = findViewById(R.id.btn_ticket_workflow);
 
         if (savedInstanceState == null) {
@@ -87,11 +99,11 @@ public class TicketDetailActivity extends AppCompatActivity {
         @Override
         protected Ticket doInBackground(String... params) {
             try {
-                mTicket = ticketRestClient.findById(Long.valueOf(params[0]));
+                return new TicketRestClient().findById(Long.valueOf(params[0]));
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao buscar ticket.", e);
+                throw e;
             }
-            return mTicket;
         }
 
         @Override
@@ -101,8 +113,20 @@ public class TicketDetailActivity extends AppCompatActivity {
                 Log.i(TAG, mTicket.toString());
                 if (mTicket != null) {
                     setTitle(mTicket.getPartnerTicketCode());
+                    ticketPartnerCode.setText(mTicket.getPartnerTicketCode());
                     ticketDescricao.setText(mTicket.getProblemDescription());
-                    ticketEmpresaSolicitante.setText(mTicket.getUserAffected().getLocation().getCustomer().getName());
+                    String ticketEnderecoText = mTicket.getUserAffected().getLocation().getAddress() + "," +
+                            mTicket.getUserAffected().getLocation().getNumber() + " - " +
+                            mTicket.getUserAffected().getLocation().getNeighborhood() + ", " +
+                            mTicket.getUserAffected().getLocation().getCity() + "-" + mTicket.getUserAffected().getLocation().getState() + " " + mTicket.getUserAffected().getLocation().getZipCode();
+                    ticketEndereco.setText(ticketEnderecoText);
+                    ticketResponsavel.setText(mTicket.getUserAffected().getFullName());
+                    String ticketEmpresaSolicitanteText = mTicket.getUserAffected().getLocation().getCustomer().getName() + " - " +
+                            mTicket.getUserAffected().getLocation().getName();
+                    ticketEmpresaSolicitante.setText(ticketEmpresaSolicitanteText);
+                    SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt","BR"));
+                    ticketSla.setText(f.format(mTicket.getSla()));
+                    ticketDataAgendamento.setText(f.format(mTicket.getDateScheduling()));
 
                     switch (mTicket.getTicketStatus().getName()) {
                         case "ON_THE_WAY":
@@ -121,8 +145,8 @@ public class TicketDetailActivity extends AppCompatActivity {
                     }
 
                     buttonTicketWorkflow.setOnClickListener(new View.OnClickListener() {
-                        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                        Long idUserFs = settings.getLong("idUserFsLogged", 0L);
+                        final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                        final Long idUserFs = settings.getLong("idUserFsLogged", 0L);
                         @Override
                         public void onClick(View v) {
                             PostHistoryByIdTicketAsync postHistoryByIdTicketAsync = new PostHistoryByIdTicketAsync();
@@ -159,7 +183,7 @@ public class TicketDetailActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(TicketHistory... params) {
             try {
-                ticketRestClient.postHistoryByIdTicket(params[0]);
+                new TicketRestClient().postHistoryByIdTicket(params[0]);
                 Log.i(TAG, "idTicket: " + params[0].getIdTicket());
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao executar alteracao de status do ticket.", e);

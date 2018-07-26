@@ -40,6 +40,7 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.ticket_list_content, parent, false);
+        parent.setBackgroundColor(Color.parseColor("#FFFFFF"));
         return new ViewHolder(view);
     }
 
@@ -50,15 +51,15 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
 
         switch (mTickets.get(position).getTicketStatus().getName()) {
             case "ASSIGNED":
-                holder.mStatus.setText("ATR");
+                holder.mStatus.setText("ATRIBUIDO");
                 holder.mStatus.setBackgroundColor(Color.parseColor("#FFFF00"));
                 break;
             case "ON_THE_WAY":
-                holder.mStatus.setText("CAM");
+                holder.mStatus.setText("A CAMINHO");
                 holder.mStatus.setBackgroundColor(Color.parseColor("#1E90FF"));
                 break;
             case "IN_PROGRESS":
-                holder.mStatus.setText("PRO");
+                holder.mStatus.setText("TRABALHANDO");
                 holder.mStatus.setBackgroundColor(Color.parseColor("#32CD32"));
                 break;
             default:

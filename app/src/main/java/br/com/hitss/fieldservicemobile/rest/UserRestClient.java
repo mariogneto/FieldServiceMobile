@@ -19,12 +19,8 @@ public class UserRestClient {
 
     private static final String TAG = UserRestClient.class.getSimpleName();
 
-    private String BASE_URL = "http://10.172.16.78:7080/fieldservice/v1/users/";
-    private RestTemplate restTemplate;
-
-    public UserRestClient() {
-        restTemplate = new RestTemplate();
-    }
+    private final String BASE_URL = "http://10.172.16.78:7080/fieldservice/v1/users/";
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public void postUserLocationHistory(String idUserFs, Double latitude, Double longitude) {
         HttpHeaders headers = new HttpHeaders();

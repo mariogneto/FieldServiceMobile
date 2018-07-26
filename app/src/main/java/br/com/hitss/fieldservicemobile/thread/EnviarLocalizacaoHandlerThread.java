@@ -14,7 +14,6 @@ import br.com.hitss.fieldservicemobile.util.GPSTracker;
 public class EnviarLocalizacaoHandlerThread extends HandlerThread {
 
     private static final String TAG = EnviarLocalizacaoHandlerThread.class.getSimpleName();
-    private UserRestClient userRestClient = new UserRestClient();
 
     public EnviarLocalizacaoHandlerThread() {
         super(TAG);
@@ -39,12 +38,12 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
         handler.sendMessage(new Message());
     }
 
-    private class EnviaPosicaoTecnicoAsync extends AsyncTask<String, Void, Void> {
+    private static class EnviaPosicaoTecnicoAsync extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {
             try {
-                userRestClient.postUserLocationHistory(params[0], Double.valueOf(params[1]), Double.valueOf(params[2]));
+                new UserRestClient().postUserLocationHistory(params[0], Double.valueOf(params[1]), Double.valueOf(params[2]));
                 Log.i(TAG, "idUserFs: "+ params[0] +"  latitude: " + params[1] + "longitude: " + params[2]);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao enviar posicao tecnico.", e);

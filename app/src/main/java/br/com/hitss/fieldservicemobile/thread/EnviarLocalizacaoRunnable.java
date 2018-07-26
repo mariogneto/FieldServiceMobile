@@ -8,11 +8,11 @@ public class EnviarLocalizacaoRunnable implements Runnable {
     private static final String TAG = EnviarLocalizacaoRunnable.class.getSimpleName();
 
     private int delayEnvioLocalizacao;
-    private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
-    private Thread mThread;
+    private final EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
+    private final Thread mThread;
     private boolean controller;
     private Long idUSerFsLogged;
-    private Context context;
+    private final Context context;
 
     public EnviarLocalizacaoRunnable(EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread, Context context) {
         this.enviarLocalizacaoHandlerThread = enviarLocalizacaoHandlerThread;

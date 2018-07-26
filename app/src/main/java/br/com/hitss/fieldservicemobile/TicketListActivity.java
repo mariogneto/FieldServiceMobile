@@ -3,11 +3,11 @@ package br.com.hitss.fieldservicemobile;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -44,14 +44,14 @@ public class TicketListActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "PrefsUser";
 
-    private TicketRestClient ticketRestClient = new TicketRestClient();
-    private UserRestClient userRestClient = new UserRestClient();
+    private final TicketRestClient ticketRestClient = new TicketRestClient();
+    private final UserRestClient userRestClient = new UserRestClient();
 
     private List<Ticket> mTickets = new ArrayList<>();
 
     private boolean buscarTicketsBackground = true;
 
-    private int delayListarTickets = 5000;
+    private final int delayListarTickets = 5000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,16 +101,10 @@ public class TicketListActivity extends AppCompatActivity {
         enviarLocalizacaoRunnable.start();
     }
 
-    public void loadTicketList(){
+    private void loadTicketList(){
         BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
         Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
         buscaTicketsAsync.execute();
-    }
-
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        if(mTickets == null)
-            mTickets = new ArrayList<>();
-        recyclerView.setAdapter(new TicketListAdapter(this, mTickets));
     }
 
     @Override
@@ -154,9 +148,14 @@ public class TicketListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<Ticket> tickets) {
             SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-            RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list);
+            RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list_recycler_view);
             assert ticketListRecyclerView != null;
-            setupRecyclerView(ticketListRecyclerView);
+            if(mTickets == null)
+                mTickets = new ArrayList<>();
+            ticketListRecyclerView.setAdapter(new TicketListAdapter(TicketListActivity.this, mTickets));
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ticketListRecyclerView.getContext()
+                    , LinearLayoutManager.VERTICAL, false);
+            ticketListRecyclerView.setLayoutManager(linearLayoutManager);
 
             if (tickets != null && !tickets.isEmpty()) {
                 Log.i(TAG, tickets.toString());

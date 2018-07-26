@@ -9,6 +9,18 @@
     tools:showIn="@layout/activity_ticket_detail">
 
     <TextView
+        android:id="@+id/lbl_ticket_partner_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ticket: "
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/ticket_partner_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:id="@+id/lbl_ticket_descricao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,6 +45,55 @@
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="29dp" />
+
+    <TextView
+        android:id="@+id/lbl_ticket_responsavel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Responsavel:"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/ticket_responsavel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/lbl_ticket_endereco"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Endereço:"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/ticket_endereco"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/lbl_ticket_sla"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SLA:"
+        android:textStyle="bold" />
+
+
+    <TextView
+        android:id="@+id/ticket_sla"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/lbl_ticket_data_agendamento"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Agendamento:"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/ticket_data_agendamento"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:layout_width="match_parent"

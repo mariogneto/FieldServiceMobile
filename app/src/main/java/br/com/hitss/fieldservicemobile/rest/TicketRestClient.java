@@ -20,12 +20,8 @@ public class TicketRestClient {
 
     private static final String TAG = TicketRestClient.class.getSimpleName();
 
-    private String BASE_URL = "http://10.172.16.78:7080/fieldservice/v1/tickets/";
-    private RestTemplate restTemplate;
-
-    public TicketRestClient() {
-        restTemplate = new RestTemplate();
-    }
+    private final String BASE_URL = "http://10.172.16.78:7080/fieldservice/v1/tickets/";
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public Ticket findById(Long id) {
         try {

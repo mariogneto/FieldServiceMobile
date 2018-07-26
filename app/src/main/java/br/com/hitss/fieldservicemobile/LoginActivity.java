@@ -25,7 +25,7 @@ import br.com.hitss.fieldservicemobile.util.GPSTracker;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String TAG = TicketDetailActivity.class.getSimpleName();
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     private EditText editTextLogin;
     private EditText editTextPassword;
@@ -33,9 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button buttonLogin;
     private int counter = 3;
 
-    private UserFs user;
-    private UserRestClient userRestClient = new UserRestClient();
-    public static final String PREFS_NAME = "PrefsUser";
+    private static final String PREFS_NAME = "PrefsUser";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,12 +110,11 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected UserFs doInBackground(String... params) {
             try {
-                user = userRestClient.login(params[0],params[1]);
+                return new UserRestClient().login(params[0],params[1]);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao buscar tickets", e);
                 throw e;
             }
-            return user;
         }
 
         @Override
