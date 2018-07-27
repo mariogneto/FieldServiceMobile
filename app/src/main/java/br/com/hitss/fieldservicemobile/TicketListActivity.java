@@ -74,7 +74,7 @@ public class TicketListActivity extends AppCompatActivity {
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setIcon(R.drawable.logo);
+            actionBar.setIcon(R.drawable.logo_inicio);
             //actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
