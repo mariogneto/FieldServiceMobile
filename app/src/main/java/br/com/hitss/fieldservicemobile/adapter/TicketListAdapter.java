@@ -40,7 +40,7 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.ticket_list_content, parent, false);
-        parent.setBackgroundColor(Color.parseColor("#FFFFFF"));
+        //sparent.setBackgroundColor(Color.parseColor("#3366FF"));
         return new ViewHolder(view);
     }
 

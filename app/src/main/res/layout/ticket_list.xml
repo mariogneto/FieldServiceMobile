@@ -6,8 +6,8 @@
     android:name="br.com.hitss.fieldserviceapp.TicketListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
     app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context=".TicketListActivity"
     tools:listitem="@layout/ticket_list_content" />
