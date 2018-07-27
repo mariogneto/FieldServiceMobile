@@ -28,6 +28,7 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
             Context context = view.getContext();
             Intent intent = new Intent(context, TicketDetailActivity.class);
             intent.putExtra(TicketDetailActivity.ARG_ITEM_ID, item.getIdTicket().toString());
+            intent.putExtra(TicketDetailActivity.ARG_ITEM_PARTNER_ID, item.getPartnerTicketCode());
             context.startActivity(intent);
         }
     };

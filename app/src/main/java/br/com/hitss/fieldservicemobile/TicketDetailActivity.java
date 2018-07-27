@@ -34,6 +34,8 @@ public class TicketDetailActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "PrefsUser";
 
     public static final String ARG_ITEM_ID = "ticket_id";
+    public static final String ARG_ITEM_PARTNER_ID = "partnet_ticket_id";
+
 
     private TextView ticketDescricao;
     private TextView ticketPartnerCode;
@@ -54,14 +56,6 @@ public class TicketDetailActivity extends AppCompatActivity {
         toolbar.setSubtitle("SubTest");
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Substitua com sua própria ação de detalhes", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -80,13 +74,18 @@ public class TicketDetailActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             Bundle extras = this.getIntent().getExtras();
             if (extras != null) {
+                String partnerIdTicket = (String) extras.get(ARG_ITEM_PARTNER_ID);
+                setTitle(partnerIdTicket);
                 String idTicket = (String) extras.get(ARG_ITEM_ID);
                 BuscaTicketAsync buscaTicketsAsync = new BuscaTicketAsync();
                 Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
                 buscaTicketsAsync.execute(idTicket);
             }
         } else {
+            String partnerIdTicket = (String) savedInstanceState.getSerializable(ARG_ITEM_PARTNER_ID);
+            setTitle(partnerIdTicket);
             String idTicket = (String) savedInstanceState.getSerializable(ARG_ITEM_ID);
+            setTitle(idTicket);
             BuscaTicketAsync buscaTicketsAsync = new BuscaTicketAsync();
             Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
             buscaTicketsAsync.execute(idTicket);
@@ -110,7 +109,6 @@ public class TicketDetailActivity extends AppCompatActivity {
             if (ticket != null) {
                 Log.i(TAG, ticket.toString());
                 if (ticket != null) {
-                    setTitle(ticket.getPartnerTicketCode());
                     ticketPartnerCode.setText(ticket.getPartnerTicketCode());
                     ticketDescricao.setText(ticket.getProblemDescription());
                     String ticketEnderecoText = ticket.getUserAffected().getLocation().getAddress() + "," +

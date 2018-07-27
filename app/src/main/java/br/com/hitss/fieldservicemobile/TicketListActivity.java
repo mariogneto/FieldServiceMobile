@@ -75,7 +75,6 @@ public class TicketListActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setIcon(R.drawable.logo_inicio);
-            //actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         new Thread(new Runnable() {
