@@ -22,7 +22,7 @@ public class UserRestClient {
     private final String BASE_URL = "http://10.172.16.78:7080/fieldservice/v1/users/";
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public void postUserLocationHistory(String idUserFs, Double latitude, Double longitude) {
+    public boolean postUserLocationHistory(String idUserFs, Double latitude, Double longitude) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         String plainCreds = "web.mobile:wm12345";
@@ -40,6 +40,7 @@ public class UserRestClient {
             Log.e(TAG, "erro ao fazer POST de UserLocationHistory.", e);
             throw e;
         }
+        return true;
     }
 
     public void postLogoff(String idUserFs) {

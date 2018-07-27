@@ -74,7 +74,8 @@ public class TicketListActivity extends AppCompatActivity {
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setIcon(R.drawable.logo);
+            //actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         new Thread(new Runnable() {
@@ -199,4 +200,11 @@ public class TicketListActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        logoff();
+        enviarLocalizacaoRunnable.stop();
+        enviarLocalizacaoHandlerThread.quit();
+        super.onDestroy();
+    }
 }
