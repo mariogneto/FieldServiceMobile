@@ -20,7 +20,7 @@ import android.widget.Toast;
 import java.util.concurrent.TimeUnit;
 
 import br.com.hitss.fieldservicemobile.model.UserFs;
-import br.com.hitss.fieldservicemobile.rest.UserRestClient;
+import br.com.hitss.fieldservicemobile.rest.CustomTrust;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
 
 public class LoginActivity extends AppCompatActivity {
@@ -101,6 +101,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+
     private class BuscaUserAsync extends AsyncTask<String, Void, UserFs> {
         @Override
         protected void onPreExecute() {
@@ -110,11 +111,18 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected UserFs doInBackground(String... params) {
             try {
-                return new UserRestClient().login(params[0],params[1]);
+
+                CustomTrust customTrust = new CustomTrust();
+                customTrust.run(params[0],params[1]);
+
+                Log.i("RETRO","TEST");
+                //return new UserRestClient().login(params[0],params[1]);
+                return null;
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao buscar tickets", e);
-                throw e;
+                //throw e;
             }
+            return null;
         }
 
         @Override
