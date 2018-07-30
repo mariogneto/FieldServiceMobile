@@ -1,19 +1,15 @@
 package br.com.hitss.fieldservicemobile.rest;
-
-import android.util.Base64;
-
-import org.springframework.http.HttpHeaders;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -22,18 +18,23 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import br.com.hitss.fieldservicemobile.model.UserFs;
 import okhttp3.CertificatePinner;
-import okhttp3.Headers;
+import okhttp3.Credentials;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okio.Buffer;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-public final class CustomTrust {
+public class BaseController {
+
+    static String BASE_URL;
     private final OkHttpClient client;
+    private FieldserviceAPI fieldserviceAPI;
 
-    public CustomTrust() {
+    public BaseController(String baseUrl) {
+        BASE_URL = baseUrl;
         X509TrustManager trustManager;
         SSLSocketFactory sslSocketFactory;
         try {
@@ -45,30 +46,34 @@ public final class CustomTrust {
             throw new RuntimeException(e);
         }
 
-        client = new OkHttpClient.Builder()
-                .sslSocketFactory(sslSocketFactory, trustManager)
-                .build();
-    }
 
-    public void run(String user, String pass) throws Exception {
-        String base64CredsBytes = Base64.encodeToString("web.mobile:wm12345".getBytes(), Base64.NO_WRAP);
+        client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request originalRequest = chain.request();
 
-        Request request = new Request.Builder()
-                .header(HttpHeaders.AUTHORIZATION, "Basic " + base64CredsBytes)
-                .url("https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/users")
-                .build();
+                Request.Builder builder = originalRequest.newBuilder().header("Authorization",
+                        Credentials.basic("web.mobile", "wm12345"));
 
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-            Headers responseHeaders = response.headers();
-            for (int i = 0; i < responseHeaders.size(); i++) {
-                System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                Request newRequest = builder.build();
+                return chain.proceed(newRequest);
             }
+        }).sslSocketFactory(sslSocketFactory, trustManager)
+                .build();
 
-            System.out.println(response.body().string());
-        }
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        fieldserviceAPI = retrofit.create(FieldserviceAPI.class);
     }
+
 
     /**
      * Returns an input stream containing one or more certificate PEM files. This implementation just
@@ -180,7 +185,11 @@ public final class CustomTrust {
         }
     }
 
-    public static void main(String... args) throws Exception {
-        new CustomTrust().run(args[0],args[1]);
+    public FieldserviceAPI getFieldserviceAPI() {
+        return fieldserviceAPI;
+    }
+
+    public void setFieldserviceAPI(FieldserviceAPI fieldserviceAPI) {
+        this.fieldserviceAPI = fieldserviceAPI;
     }
 }
