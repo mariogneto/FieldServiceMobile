@@ -17,15 +17,18 @@ public interface FieldserviceAPI {
             "Accept: application/json",
             "User-Agent: Fieldservice Mobile"
     })
-    @GET("login/")
+    @GET("users/login/")
     Call<UserFs> login(@HeaderMap Map<String, String> headers);
 
     @Headers({
             "Accept: application/json",
             "User-Agent: Fieldservice Mobile"
     })
-
-    @GET("idUserTechnician={idUserFs}&idsTicketStatus=2,3,4")
+    @GET("tickets?idUserTechnician={idUserFs}&idsTicketStatus=2,3,4")
     Call<List<Ticket>> findByidUserLogged(@Path("idUserFs") Long idUserFs);
+
+
+    @GET("tickets")
+    Call<List<Ticket>> findAll();
 
 }

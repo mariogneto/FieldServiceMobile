@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "PrefsUser";
 
-    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/users/";
+    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

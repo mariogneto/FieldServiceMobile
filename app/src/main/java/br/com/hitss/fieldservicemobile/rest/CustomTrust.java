@@ -1,15 +1,19 @@
 package br.com.hitss.fieldservicemobile.rest;
+
+import android.util.Base64;
+
+import org.springframework.http.HttpHeaders;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.util.List;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -18,23 +22,21 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import br.com.hitss.fieldservicemobile.model.UserFs;
 import okhttp3.CertificatePinner;
-import okhttp3.Credentials;
-import okhttp3.Interceptor;
+import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okio.Buffer;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class BaseController {
-
-    static String BASE_URL;
+public final class CustomTrust {
     private final OkHttpClient client;
-    private FieldserviceAPI fieldserviceAPI;
+    private Retrofit retrofit;
 
-    public BaseController(String baseUrl) {
-        BASE_URL = baseUrl;
+    public CustomTrust() {
         X509TrustManager trustManager;
         SSLSocketFactory sslSocketFactory;
         try {
@@ -46,35 +48,42 @@ public class BaseController {
             throw new RuntimeException(e);
         }
 
-
-        client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request originalRequest = chain.request();
-
-                Request.Builder builder = originalRequest.newBuilder().header("Authorization",
-                        Credentials.basic("web.mobile", "wm12345"));
-
-                Request newRequest = builder.build();
-                return chain.proceed(newRequest);
-            }
-        }).sslSocketFactory(sslSocketFactory, trustManager)
+        client = new OkHttpClient.Builder()
+                .sslSocketFactory(sslSocketFactory, trustManager)
                 .build();
 
-        Gson gson = new GsonBuilder()
-                .setDateFormat("dd/MM/yyyy HH:mm:ss")
-                .setLenient()
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+        retrofit = new Retrofit.Builder()
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        fieldserviceAPI = retrofit.create(FieldserviceAPI.class);
+
     }
 
+    public void run(String user, String pass) throws Exception {
+        String base64CredsBytes = Base64.encodeToString("web.mobile:wm12345".getBytes(), Base64.NO_WRAP);
+
+        retrofit.newBuilder()
+                .baseUrl("https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/users");
+
+
+        Request request = new Request.Builder()
+                .header(HttpHeaders.AUTHORIZATION, "Basic " + base64CredsBytes)
+                .url("https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/users")
+                .build();
+
+        client.newCall(request).execute();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+            Headers responseHeaders = response.headers();
+            for (int i = 0; i < responseHeaders.size(); i++) {
+                System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+            }
+
+            System.out.println(response.body().string());
+        }
+    }
 
     /**
      * Returns an input stream containing one or more certificate PEM files. This implementation just
@@ -186,11 +195,7 @@ public class BaseController {
         }
     }
 
-    public FieldserviceAPI getFieldserviceAPI() {
-        return fieldserviceAPI;
-    }
-
-    public void setFieldserviceAPI(FieldserviceAPI fieldserviceAPI) {
-        this.fieldserviceAPI = fieldserviceAPI;
+    public static void main(String... args) throws Exception {
+        new CustomTrust().run(args[0],args[1]);
     }
 }

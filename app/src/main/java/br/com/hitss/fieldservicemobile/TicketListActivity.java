@@ -51,7 +51,7 @@ public class TicketListActivity extends AppCompatActivity {
     private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
 
     private static final String PREFS_NAME = "PrefsUser";
-    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/tickets/";
+    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
 
     private final TicketRestClient ticketRestClient = new TicketRestClient();
     private final UserRestClient userRestClient = new UserRestClient();
@@ -116,36 +116,42 @@ public class TicketListActivity extends AppCompatActivity {
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Long idUserFs = settings.getLong("idUserFsLogged", 0L);
-        Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs);
+        //Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs);
+        Call<List<Ticket>> call = fieldserviceAPI.findAll();
         call.enqueue(new Callback<List<Ticket>>() {
             @Override
             public void onResponse(Call<List<Ticket>> call, Response<List<Ticket>> response) {
                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                 RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list_recycler_view);
                 assert ticketListRecyclerView != null;
-                /*if(response == null)
-                    response.body() = new ArrayList<>();*/
-                ticketListRecyclerView.setAdapter(new TicketListAdapter(TicketListActivity.this, response.body()));
+                if(response.isSuccessful()){
+                    mTickets = response.body();
+                    if(mTickets != null && mTickets.isEmpty())
+                        mTickets = new ArrayList<>();
+                }
+
+                ticketListRecyclerView.setAdapter(new TicketListAdapter(TicketListActivity.this, mTickets));
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ticketListRecyclerView.getContext()
                         , LinearLayoutManager.VERTICAL, false);
                 ticketListRecyclerView.setLayoutManager(linearLayoutManager);
 
-                if (response != null && !response.body().isEmpty()) {
-                    Log.i(TAG, response.toString());
-                    buscarTicketsBackground = false;
-                } else {
-                    Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("isWorking", true);
-                    Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
-                    Log.i(TAG, "Nenhum ticket encontrado.");
-                    buscarTicketsBackground = true;
-                }
+                //if (response != null && !response.body().isEmpty()) {
+                   /* Log.i(TAG, response.toString());
+                    buscarTicketsBackground = false;*/
+                //} else {
+                Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("isWorking", true);
+                Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
+                Log.i(TAG, "Nenhum ticket encontrado.");
+                buscarTicketsBackground = true;
+                //}
             }
 
             @Override
             public void onFailure(Call<List<Ticket>> call, Throwable t) {
-
+                Log.e(TAG, "ERRO");
+                t.printStackTrace();
             }
         });
 
