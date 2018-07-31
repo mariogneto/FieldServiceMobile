@@ -18,14 +18,22 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
+import br.com.hitss.fieldservicemobile.model.UserFs;
+import br.com.hitss.fieldservicemobile.rest.BaseController;
+import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
 import br.com.hitss.fieldservicemobile.rest.UserRestClient;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * An activity representing a list of Tickets. This activity
@@ -43,6 +51,7 @@ public class TicketListActivity extends AppCompatActivity {
     private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
 
     private static final String PREFS_NAME = "PrefsUser";
+    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/tickets/";
 
     private final TicketRestClient ticketRestClient = new TicketRestClient();
     private final UserRestClient userRestClient = new UserRestClient();
@@ -102,9 +111,47 @@ public class TicketListActivity extends AppCompatActivity {
     }
 
     private void loadTicketList(){
-        BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
+        BaseController baseController = new BaseController(BASE_URL);
+        FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        Long idUserFs = settings.getLong("idUserFsLogged", 0L);
+        Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs);
+        call.enqueue(new Callback<List<Ticket>>() {
+            @Override
+            public void onResponse(Call<List<Ticket>> call, Response<List<Ticket>> response) {
+                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list_recycler_view);
+                assert ticketListRecyclerView != null;
+                /*if(response == null)
+                    response.body() = new ArrayList<>();*/
+                ticketListRecyclerView.setAdapter(new TicketListAdapter(TicketListActivity.this, response.body()));
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ticketListRecyclerView.getContext()
+                        , LinearLayoutManager.VERTICAL, false);
+                ticketListRecyclerView.setLayoutManager(linearLayoutManager);
+
+                if (response != null && !response.body().isEmpty()) {
+                    Log.i(TAG, response.toString());
+                    buscarTicketsBackground = false;
+                } else {
+                    Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("isWorking", true);
+                    Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "Nenhum ticket encontrado.");
+                    buscarTicketsBackground = true;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Ticket>> call, Throwable t) {
+
+            }
+        });
+
+       /* BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
         Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
-        buscaTicketsAsync.execute();
+        buscaTicketsAsync.execute();*/
     }
 
     @Override

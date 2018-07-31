@@ -57,8 +57,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Map<String, String> map = new HashMap<>();
+                buttonLogin.setEnabled(false);
 
+                BaseController baseController = new BaseController(BASE_URL);
+                FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
+                Map<String, String> map = new HashMap<>();
                 if (BuildConfig.DEBUG) {
                     map.put("login","aline.nunes.3@globalhitss.com.br");
                     map.put("password:", "1234");
@@ -66,10 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                     map.put("login",editTextLogin.getText().toString());
                     map.put("password:", editTextPassword.getText().toString());
                 }
-                BaseController baseController = new BaseController(BASE_URL);
-                FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
                 Call<UserFs> call = fieldserviceAPI.login(map);
-                buttonLogin.setEnabled(false);
                 call.enqueue(new retrofit2.Callback<UserFs>() {
                     @Override
                     public void onResponse(Call<UserFs> call, Response<UserFs> response) {
