@@ -1,15 +1,15 @@
 package br.com.hitss.fieldservicemobile;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -19,7 +19,11 @@ import java.util.Locale;
 
 import br.com.hitss.fieldservicemobile.model.Ticket;
 import br.com.hitss.fieldservicemobile.model.TicketHistory;
-import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
+import br.com.hitss.fieldservicemobile.rest.BaseController;
+import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * An activity representing a single Ticket detail screen. This
@@ -32,10 +36,10 @@ public class TicketDetailActivity extends AppCompatActivity {
     private static final String TAG = TicketDetailActivity.class.getSimpleName();
 
     private static final String PREFS_NAME = "PrefsUser";
+    private static final String ARG_ITEM_ID = "ticket_id";
+    private static final String ARG_ITEM_PARTNER_ID = "partnet_ticket_id";
 
-    public static final String ARG_ITEM_ID = "ticket_id";
-    public static final String ARG_ITEM_PARTNER_ID = "partnet_ticket_id";
-
+    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
 
     private TextView ticketDescricao;
     private TextView ticketPartnerCode;
@@ -47,13 +51,11 @@ public class TicketDetailActivity extends AppCompatActivity {
 
     private Button buttonTicketWorkflow;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket_detail);
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
-        toolbar.setSubtitle("SubTest");
         setSupportActionBar(toolbar);
 
         // Show the Up button in the action bar.
@@ -71,127 +73,119 @@ public class TicketDetailActivity extends AppCompatActivity {
         ticketSla = findViewById(R.id.ticket_sla);
         buttonTicketWorkflow = findViewById(R.id.btn_ticket_workflow);
 
-        if (savedInstanceState == null) {
-            Bundle extras = this.getIntent().getExtras();
-            if (extras != null) {
-                String partnerIdTicket = (String) extras.get(ARG_ITEM_PARTNER_ID);
-                setTitle(partnerIdTicket);
-                String idTicket = (String) extras.get(ARG_ITEM_ID);
-                BuscaTicketAsync buscaTicketsAsync = new BuscaTicketAsync();
-                Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
-                buscaTicketsAsync.execute(idTicket);
-            }
-        } else {
-            String partnerIdTicket = (String) savedInstanceState.getSerializable(ARG_ITEM_PARTNER_ID);
-            setTitle(partnerIdTicket);
-            String idTicket = (String) savedInstanceState.getSerializable(ARG_ITEM_ID);
-            setTitle(idTicket);
-            BuscaTicketAsync buscaTicketsAsync = new BuscaTicketAsync();
-            Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
-            buscaTicketsAsync.execute(idTicket);
+        Bundle extras = this.getIntent().getExtras();
+        if (extras != null) {
+            String partnerIdTicket = (String) extras.get(ARG_ITEM_PARTNER_ID);
+            setTitle("Ticket-" + partnerIdTicket);
+            String idTicket = (String) extras.get(ARG_ITEM_ID);
+            findById(Long.valueOf(idTicket));
         }
     }
 
-    private class BuscaTicketAsync extends AsyncTask<String, Void, Ticket> {
-        @Override
-        protected Ticket doInBackground(String... params) {
-            try {
-                return new TicketRestClient().findById(Long.valueOf(params[0]));
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao buscar ticket.", e);
-                throw e;
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
+    }
 
-        @Override
-        protected void onPostExecute(final Ticket ticket) {
-            super.onPostExecute(ticket);
-            if (ticket != null) {
-                Log.i(TAG, ticket.toString());
+    private void findById(Long idTicket) {
+        final BaseController baseController = new BaseController(BASE_URL);
+        final FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
+        Call<Ticket> call = fieldserviceAPI.findById(Long.valueOf(idTicket));
+        call.enqueue(new Callback<Ticket>() {
+            @Override
+            public void onResponse(Call<Ticket> call, Response<Ticket> response) {
+                final Ticket ticket = response.body();
                 if (ticket != null) {
-                    ticketPartnerCode.setText(ticket.getPartnerTicketCode());
-                    ticketDescricao.setText(ticket.getProblemDescription());
-                    String ticketEnderecoText = ticket.getUserAffected().getLocation().getAddress() + "," +
-                            ticket.getUserAffected().getLocation().getNumber() + " - " +
-                            ticket.getUserAffected().getLocation().getNeighborhood() + ", " +
-                            ticket.getUserAffected().getLocation().getCity() + "-" + ticket.getUserAffected().getLocation().getState() + " " + ticket.getUserAffected().getLocation().getZipCode();
-                    ticketEndereco.setText(ticketEnderecoText);
-                    ticketResponsavel.setText(ticket.getUserAffected().getFullName());
-                    String ticketEmpresaSolicitanteText = ticket.getUserAffected().getLocation().getCustomer().getName() + " - " +
-                            ticket.getUserAffected().getLocation().getName();
-                    ticketEmpresaSolicitante.setText(ticketEmpresaSolicitanteText);
-                    SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt","BR"));
-                    ticketSla.setText(f.format(ticket.getSla()));
-                    ticketDataAgendamento.setText(f.format(ticket.getDateScheduling()));
+                    Log.i(TAG, ticket.toString());
+                    if (ticket != null) {
+                        ticketPartnerCode.setText(ticket.getPartnerTicketCode());
+                        ticketDescricao.setText(ticket.getProblemDescription());
+                        String ticketEnderecoText = ticket.getUserAffected().getLocation().getAddress() + "," +
+                                ticket.getUserAffected().getLocation().getNumber() + " - " +
+                                ticket.getUserAffected().getLocation().getNeighborhood() + ", " +
+                                ticket.getUserAffected().getLocation().getCity() + "-" + ticket.getUserAffected().getLocation().getState() + " " + ticket.getUserAffected().getLocation().getZipCode();
+                        ticketEndereco.setText(ticketEnderecoText);
+                        ticketResponsavel.setText(ticket.getUserAffected().getFullName());
+                        String ticketEmpresaSolicitanteText = ticket.getUserAffected().getLocation().getCustomer().getName() + " - " +
+                                ticket.getUserAffected().getLocation().getName();
+                        ticketEmpresaSolicitante.setText(ticketEmpresaSolicitanteText);
+                        SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt","BR"));
+                        if(ticket.getSla() != null)
+                            ticketSla.setText(f.format(ticket.getSla()));
+                        if(ticket.getDateScheduling() != null)
+                            ticketDataAgendamento.setText(f.format(ticket.getDateScheduling()));
 
-                    switch (ticket.getTicketStatus().getName()) {
-                        case "ON_THE_WAY":
-                            buttonTicketWorkflow.setText("TRABALHAR");
-                            buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#32CD32"));
-                            buttonTicketWorkflow.setVisibility(View.VISIBLE);
-                            break;
-                        case "IN_PROGRESS":
-                            buttonTicketWorkflow.setText("RESOLVER");
-                            buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#FF0000"));
-                            buttonTicketWorkflow.setVisibility(View.VISIBLE);
-                            break;
-                        default:
-                            buttonTicketWorkflow.setVisibility(View.INVISIBLE);
-                            break;
-                    }
-
-                    buttonTicketWorkflow.setOnClickListener(new View.OnClickListener() {
-                        final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                        final Long idUserFs = settings.getLong("idUserFsLogged", 0L);
-                        @Override
-                        public void onClick(View v) {
-                            PostHistoryByIdTicketAsync postHistoryByIdTicketAsync = new PostHistoryByIdTicketAsync();
-                            Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
-                            SharedPreferences.Editor editor = settings.edit();
-                            switch (ticket.getTicketStatus().getName()) {
-                                case "ASSIGNED":
-                                    postHistoryByIdTicketAsync.execute(new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "ON_THE_WAY", "PREENCHER..."));
-                                    editor.putBoolean("isWorking", false);
-                                    break;
-                                case "ON_THE_WAY":
-                                    postHistoryByIdTicketAsync.execute(new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", "PREENCHER..."));
-                                    editor.putBoolean("isWorking", true);
-                                    break;
-                                case "IN_PROGRESS":
-                                    postHistoryByIdTicketAsync.execute(new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "CLOSED", "PREENCHER..."));
-                                    editor.putBoolean("isWorking", true);
-                                    break;
-                              default:
-                                  editor.apply();
-                                  editor.commit();
-                            }
+                        switch (ticket.getTicketStatus().getName()) {
+                            case "ON_THE_WAY":
+                                buttonTicketWorkflow.setText("TRABALHAR");
+                                buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#32CD32"));
+                                buttonTicketWorkflow.setVisibility(View.VISIBLE);
+                                break;
+                            case "IN_PROGRESS":
+                                buttonTicketWorkflow.setText("RESOLVER");
+                                buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#FF0000"));
+                                buttonTicketWorkflow.setVisibility(View.VISIBLE);
+                                break;
+                            default:
+                                buttonTicketWorkflow.setVisibility(View.INVISIBLE);
+                                break;
                         }
-                    });
+
+                        buttonTicketWorkflow.setOnClickListener(new View.OnClickListener() {
+                            final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                            final Long idUserFs = settings.getLong("idUserFsLogged", 0L);
+                            @Override
+                            public void onClick(View v) {
+                                TicketHistory ticketHistory = null;
+                                SharedPreferences.Editor editor = settings.edit();
+                                switch (ticket.getTicketStatus().getName()) {
+                                    case "ASSIGNED":
+                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "ON_THE_WAY", "PREENCHER...");
+                                        editor.putBoolean("isWorking", false);
+                                        break;
+                                    case "ON_THE_WAY":
+                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", "PREENCHER...");
+                                        editor.putBoolean("isWorking", true);
+                                        break;
+                                    case "IN_PROGRESS":
+                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "CLOSED", "PREENCHER...");
+                                        editor.putBoolean("isWorking", true);
+                                        break;
+                                    default:
+                                        editor.apply();
+                                        editor.commit();
+                                }
+                                Call<Void> call = fieldserviceAPI.postHistoryByIdTicket(ticket.getIdTicket(), ticketHistory);
+                                call.enqueue(new Callback<Void>() {
+                                    @Override
+                                    public void onResponse(Call<Void> call, Response<Void> response) {
+                                        Log.i(TAG, "idTicket: " + ticket.getIdTicket());
+                                        finish();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<Void> call, Throwable t) {
+                                        Log.e(TAG,t.getMessage());
+                                    }
+                                });
+                            }
+                        });
+                    }
+                } else {
+                    Log.i(TAG, "ticket nao encontrdo.");
                 }
-            } else {
-                Log.i(TAG, "vazio!");
             }
-        }
-    }
 
-    private class PostHistoryByIdTicketAsync extends AsyncTask<TicketHistory, Void, Void> {
-
-        @Override
-        protected Void doInBackground(TicketHistory... params) {
-            try {
-                new TicketRestClient().postHistoryByIdTicket(params[0]);
-                Log.i(TAG, "idTicket: " + params[0].getIdTicket());
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao executar alteracao de status do ticket.", e);
+            @Override
+            public void onFailure(Call<Ticket> call, Throwable t) {
+                Log.e(TAG, t.getMessage());
             }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            finish();
-            super.onPostExecute(aVoid);
-        }
+        });
     }
 
 }

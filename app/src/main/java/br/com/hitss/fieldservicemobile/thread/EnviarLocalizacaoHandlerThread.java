@@ -2,16 +2,17 @@ package br.com.hitss.fieldservicemobile.thread;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import br.com.hitss.fieldservicemobile.rest.UserRestClient;
+import br.com.hitss.fieldservicemobile.model.UserLocationHistory;
+import br.com.hitss.fieldservicemobile.rest.BaseController;
+import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class EnviarLocalizacaoHandlerThread extends HandlerThread {
 
@@ -23,6 +24,8 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
         super(TAG);
     }
 
+    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
+
     private int count = 0;
     public synchronized void sendLocation(final Long idUserFsLogged, final Context context) {
 
@@ -30,42 +33,27 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
                 new Handler(getLooper()) {
                     @Override
                     public void handleMessage(Message msg) {
-                        EnviaPosicaoTecnicoAsync enviaPosicaoTecnicoAsync = new EnviaPosicaoTecnicoAsync();
-                        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
+                        BaseController baseController = new BaseController(BASE_URL);
+                        FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
                         GPSTracker gpsTracker = new GPSTracker(context);
-                        Location location = gpsTracker.getLocation();
-                        enviaPosicaoTecnicoAsync.execute(String.valueOf(idUserFsLogged), String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+                        final Location location = gpsTracker.getLocation();
+                        UserLocationHistory userLocationHistory = new UserLocationHistory(location.getLatitude(), location.getLongitude());
+                        Call<Void> call = fieldserviceAPI.postUserLocationHistory(idUserFsLogged, userLocationHistory);
+                        call.enqueue(new retrofit2.Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                Log.i(TAG,"idUserFs: " + idUserFsLogged + " latitude: " + String.valueOf(location.getLatitude()) + " longetude: " + String.valueOf(location.getLongitude()));
+                            }
+
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                Log.e(TAG, "Erro ao enviar posicao tecnico.", t);
+                            }
+                        });
                         Log.i(TAG, "Contador: " + count++);
                     }
                 };
 
         handler.sendMessage(new Message());
     }
-
-    private static class EnviaPosicaoTecnicoAsync extends AsyncTask<String, Void, Void> {
-
-        private final AtomicInteger counter = new AtomicInteger();
-
-        @Override
-        protected Void doInBackground(String... params) {
-            try {
-                new UserRestClient().postUserLocationHistory(params[0], Double.valueOf(params[1]), Double.valueOf(params[2]));
-                Log.i(TAG, "idUserFs: "+ params[0] +"  latitude: " + params[1] + "longitude: " + params[2]);
-            } catch (Exception e) {
-                while (counter.getAndIncrement() < times) {
-                    Log.i(TAG, "Tentativa " + times + "- Reenviando Localizacao idUserFs: " + params[0]);
-                    try {
-                        Thread.sleep(10000);
-                        if (new UserRestClient().postUserLocationHistory(params[0], Double.valueOf(params[1]), Double.valueOf(params[2])))
-                            break;
-                    } catch (Exception e1) {
-                        Log.e(TAG, "Erro ao enviar posicao tecnico.", e);
-                    }
-                }
-            }
-            return null;
-        }
-
-    }
-
 }

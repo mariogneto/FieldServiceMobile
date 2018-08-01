@@ -19,6 +19,9 @@ import br.com.hitss.fieldservicemobile.model.Ticket;
 
 public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.ViewHolder> {
 
+    private static final String ARG_ITEM_ID = "ticket_id";
+    private static final String ARG_ITEM_PARTNER_ID = "partnet_ticket_id";
+
     private final List<Ticket> mTickets;
 
     private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
@@ -27,8 +30,8 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
             Ticket item = (Ticket) view.getTag();
             Context context = view.getContext();
             Intent intent = new Intent(context, TicketDetailActivity.class);
-            intent.putExtra(TicketDetailActivity.ARG_ITEM_ID, item.getIdTicket().toString());
-            intent.putExtra(TicketDetailActivity.ARG_ITEM_PARTNER_ID, item.getPartnerTicketCode());
+            intent.putExtra(ARG_ITEM_ID, item.getIdTicket().toString());
+            intent.putExtra(ARG_ITEM_PARTNER_ID, item.getPartnerTicketCode());
             context.startActivity(intent);
         }
     };

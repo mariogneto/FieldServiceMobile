@@ -1,7 +1,6 @@
 package br.com.hitss.fieldservicemobile;
 
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,17 +17,12 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
-import br.com.hitss.fieldservicemobile.model.UserFs;
 import br.com.hitss.fieldservicemobile.rest.BaseController;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
-import br.com.hitss.fieldservicemobile.rest.TicketRestClient;
-import br.com.hitss.fieldservicemobile.rest.UserRestClient;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
 import retrofit2.Call;
@@ -52,9 +46,6 @@ public class TicketListActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "PrefsUser";
     private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
-
-    private final TicketRestClient ticketRestClient = new TicketRestClient();
-    private final UserRestClient userRestClient = new UserRestClient();
 
     private List<Ticket> mTickets = new ArrayList<>();
 
@@ -116,8 +107,7 @@ public class TicketListActivity extends AppCompatActivity {
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Long idUserFs = settings.getLong("idUserFsLogged", 0L);
-        //Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs);
-        Call<List<Ticket>> call = fieldserviceAPI.findAll();
+        Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs, "2,3,4");
         call.enqueue(new Callback<List<Ticket>>() {
             @Override
             public void onResponse(Call<List<Ticket>> call, Response<List<Ticket>> response) {
@@ -126,7 +116,7 @@ public class TicketListActivity extends AppCompatActivity {
                 assert ticketListRecyclerView != null;
                 if(response.isSuccessful()){
                     mTickets = response.body();
-                    if(mTickets != null && mTickets.isEmpty())
+                    if(mTickets == null)
                         mTickets = new ArrayList<>();
                 }
 
@@ -135,29 +125,24 @@ public class TicketListActivity extends AppCompatActivity {
                         , LinearLayoutManager.VERTICAL, false);
                 ticketListRecyclerView.setLayoutManager(linearLayoutManager);
 
-                //if (response != null && !response.body().isEmpty()) {
-                   /* Log.i(TAG, response.toString());
-                    buscarTicketsBackground = false;*/
-                //} else {
-                Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("isWorking", true);
-                Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
-                Log.i(TAG, "Nenhum ticket encontrado.");
-                buscarTicketsBackground = true;
-                //}
+                if (mTickets != null && !mTickets.isEmpty()) {
+                    Log.i(TAG, response.toString());
+                    buscarTicketsBackground = false;
+                } else {
+                    Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("isWorking", true);
+                    Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "Nenhum ticket encontrado.");
+                    buscarTicketsBackground = true;
+                }
             }
 
             @Override
             public void onFailure(Call<List<Ticket>> call, Throwable t) {
-                Log.e(TAG, "ERRO");
-                t.printStackTrace();
+                Log.e(TAG, "erro ao carregar tickets: "+ t.getMessage());
             }
         });
-
-       /* BuscaTicketsAsync buscaTicketsAsync = new BuscaTicketsAsync();
-        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
-        buscaTicketsAsync.execute();*/
     }
 
     @Override
@@ -184,73 +169,27 @@ public class TicketListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class BuscaTicketsAsync extends AsyncTask<String, Void, List<Ticket>> {
-
-        @Override
-        protected List<Ticket> doInBackground(String... params) {
-            try {
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                Long idUserFs = settings.getLong("idUserFsLogged", 0L);
-                mTickets = ticketRestClient.findByidUserLogged(idUserFs);
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao buscar mTickets", e);
-            }
-            return mTickets;
-        }
-
-        @Override
-        protected void onPostExecute(List<Ticket> tickets) {
-            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-            RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list_recycler_view);
-            assert ticketListRecyclerView != null;
-            if(mTickets == null)
-                mTickets = new ArrayList<>();
-            ticketListRecyclerView.setAdapter(new TicketListAdapter(TicketListActivity.this, mTickets));
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ticketListRecyclerView.getContext()
-                    , LinearLayoutManager.VERTICAL, false);
-            ticketListRecyclerView.setLayoutManager(linearLayoutManager);
-
-            if (tickets != null && !tickets.isEmpty()) {
-                Log.i(TAG, tickets.toString());
-                buscarTicketsBackground = false;
-            } else {
-                Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("isWorking", true);
-                Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
-                Log.i(TAG, "Nenhum ticket encontrado.");
-                buscarTicketsBackground = true;
-            }
-        }
-    }
-
     private void logoff() {
+        BaseController baseController = new BaseController(BASE_URL);
+        FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Long idUserFs = settings.getLong("idUserFsLogged", 0L);
-        LogoutTecnicoAsync logoutTecnicoAsync = new LogoutTecnicoAsync();
-        Log.i(TAG, "AsyncTask Thread: " + Thread.currentThread().getName());
-        logoutTecnicoAsync.execute(String.valueOf(idUserFs));
-    }
-
-    private class LogoutTecnicoAsync extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-            try {
-                userRestClient.postLogoff(params[0]);
-                Log.i(TAG, "idUserFs: " + params[0]);
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao executar logoff do tecnico.", e);
-                throw e;
+        Call<Void> call = fieldserviceAPI.postLogoff(idUserFs);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if(response.isSuccessful())
+                    Log.i(TAG,"Logoff concluido com sucesso.");
+                finish();
             }
-            return null;
-        }
 
-        @Override
-        protected void onPostExecute(Void ticket) {
-            finish();
-        }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG,t.getMessage());
+            }
+        });
     }
+
 
     @Override
     protected void onDestroy() {
