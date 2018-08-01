@@ -23,6 +23,7 @@ import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import br.com.hitss.fieldservicemobile.rest.BaseController;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
@@ -61,50 +62,55 @@ public class LoginActivity extends AppCompatActivity {
 
                 BaseController baseController = new BaseController(BASE_URL);
                 FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
-                Map<String, String> map = new HashMap<>();
-                if (BuildConfig.DEBUG) {
+
+
+                if(!editTextLogin.getText().toString().isEmpty() && !editTextPassword.getText().toString().isEmpty()){
+                    Map<String, String> map = new HashMap<>();
+                   /* map.put("login",editTextLogin.getText().toString());
+                    map.put("password:", editTextPassword.getText().toString());*/
                     map.put("login","aline.nunes.3@globalhitss.com.br");
                     map.put("password:", "1234");
-                } else {
-                    map.put("login",editTextLogin.getText().toString());
-                    map.put("password:", editTextPassword.getText().toString());
-                }
-                Call<UserFs> call = fieldserviceAPI.login(map);
-                call.enqueue(new retrofit2.Callback<UserFs>() {
-                    @Override
-                    public void onResponse(Call<UserFs> call, Response<UserFs> response) {
-                        if(response.isSuccessful()) {
-                            UserFs userFs = response.body();
-                            Log.i(TAG, userFs.getLogin());
-                            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putLong("idUserFsLogged", userFs.getIdUserFs());
-                            editor.commit();
-                            Intent intent = new Intent(LoginActivity.this, TicketListActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Log.i(TAG, "usuario não encontrado.");
-                            Toast.makeText(LoginActivity.this, "usuario não encontrado.", Toast.LENGTH_LONG).show();
+                    Call<UserFs> call = fieldserviceAPI.login(map);
+                    call.enqueue(new Callback<UserFs>() {
+                        @Override
+                        public void onResponse(Call<UserFs> call, Response<UserFs> response) {
+                            if(response.isSuccessful()) {
+                                UserFs userFs = response.body();
+                                Log.i(TAG, userFs.getLogin());
+                                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                                SharedPreferences.Editor editor = settings.edit();
+                                editor.putLong("idUserFsLogged", userFs.getIdUserFs());
+                                editor.commit();
+                                Intent intent = new Intent(LoginActivity.this, TicketListActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Log.i(TAG, "usuario não encontrado.");
+                                Toast.makeText(LoginActivity.this, "usuario não encontrado.", Toast.LENGTH_LONG).show();
 
+                                counter--;
+                                textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(counter)));
+                                buttonLogin.setEnabled(true);
+                                if (counter == 0)
+                                    buttonLogin.setEnabled(false);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<UserFs> call, Throwable t) {
+                            Log.e(TAG, "ERRO: " + t.getMessage());
                             counter--;
                             textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(counter)));
                             buttonLogin.setEnabled(true);
                             if (counter == 0)
                                 buttonLogin.setEnabled(false);
                         }
-                    }
+                    });
+                } else {
+                    Toast.makeText(LoginActivity.this, "Preencha todos os campos.", Toast.LENGTH_LONG).show();
+                    buttonLogin.setEnabled(true);
+                }
 
-                    @Override
-                    public void onFailure(Call<UserFs> call, Throwable t) {
-                        Log.i(TAG, "não encontrado.");
-                        counter--;
-                        textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(counter)));
-                        buttonLogin.setEnabled(true);
-                        if (counter == 0)
-                            buttonLogin.setEnabled(false);
-                    }
-                });
 
                 /*final BuscaUserAsync buscaTicketsAsync = new BuscaUserAsync();
                 Log.i(TAG, "AsyncTask senado chamado Thread: " + Thread.currentThread().getName());

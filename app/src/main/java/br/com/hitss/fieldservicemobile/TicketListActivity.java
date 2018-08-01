@@ -185,6 +185,9 @@ public class TicketListActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if(response.isSuccessful())
                     Log.i(TAG,"Logoff concluido com sucesso.");
+                enviarLocalizacaoRunnable.stop();
+                enviarLocalizacaoHandlerThread.quit();
+                buscarTicketsBackground = false;
                 finish();
             }
 
@@ -198,9 +201,9 @@ public class TicketListActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        logoff();
         enviarLocalizacaoRunnable.stop();
         enviarLocalizacaoHandlerThread.quit();
+        buscarTicketsBackground = false;
         super.onDestroy();
     }
 }
