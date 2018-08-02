@@ -1,34 +1,27 @@
 package br.com.hitss.fieldservicemobile.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Ticket implements Serializable {
 
 	private static final long serialVersionUID = -2102390263672893118L;
 
 	private Long idTicket;
-	@JsonFormat(pattern="dd/MM/yyyy", locale="pt-BR", timezone="America/Sao_Paulo")
 	private Date dateScheduling;
-	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", locale="pt-BR", timezone="America/Sao_Paulo")
 	private Date dateTimeCreation;
 	private Long effectiveResolution;
 	private String partnerTicketCode;
 	private String priority;
 	private String problemDescription;
 	private String problemLocalDetail;
-	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", locale="pt-BR", timezone="America/Sao_Paulo")
 	private Date serviceDeskDateTimeCreation;
 	private String serviceDeskRequesterName;
 	private String serviceDeskRequesterPhone;
 	private String shiftScheduling;
-	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", locale="pt-BR", timezone="America/Sao_Paulo")
 	private Date sla;
 
 	private TicketStatus ticketStatus;
@@ -36,7 +29,6 @@ public class Ticket implements Serializable {
 
 	private UserFs userAffected;
 	
-	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", locale="pt-BR", timezone="America/Sao_Paulo")
 	private Date dateTimeEstimatedArrival;
 
 	private List<TicketHistory> ticketHistories;

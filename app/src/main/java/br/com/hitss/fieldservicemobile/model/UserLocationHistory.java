@@ -1,19 +1,15 @@
 package br.com.hitss.fieldservicemobile.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 import java.util.Date;
 
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserLocationHistory implements Serializable {
 
 	private static final long serialVersionUID = -7429379053018724687L;
 
 	private Long idUserLocationHistory;
-	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", locale="pt-BR", timezone="America/Sao_Paulo")
 	private Date dateTimeCreation;
 	private Long idUser;
 

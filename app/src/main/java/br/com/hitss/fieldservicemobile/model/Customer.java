@@ -1,11 +1,9 @@
 package br.com.hitss.fieldservicemobile.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Customer implements Serializable {
 
 	private static final long serialVersionUID = -3464337854050665283L;

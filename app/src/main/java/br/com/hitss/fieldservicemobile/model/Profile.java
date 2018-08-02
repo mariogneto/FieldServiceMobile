@@ -1,12 +1,10 @@
 package br.com.hitss.fieldservicemobile.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 import java.util.List;
 
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Profile implements Serializable {
 
 	private static final long serialVersionUID = -3779418468797129627L;

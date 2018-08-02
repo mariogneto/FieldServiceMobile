@@ -1,20 +1,15 @@
 package br.com.hitss.fieldservicemobile.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserFs implements Serializable {
 
 	private static final long serialVersionUID = -8502688384310900348L;
 
 	private Long idUserFs;
-	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", locale="pt-BR", timezone="America/Sao_Paulo")
 	private Date dateTimeAvailable;
 	private String fullName;
 	private String login;

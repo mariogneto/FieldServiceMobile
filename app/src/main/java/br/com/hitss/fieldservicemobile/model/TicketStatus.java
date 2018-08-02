@@ -1,10 +1,8 @@
 package br.com.hitss.fieldservicemobile.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TicketStatus implements Serializable {
 
 	private static final long serialVersionUID = 7794225195417602323L;

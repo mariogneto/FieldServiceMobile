@@ -12,16 +12,19 @@
         android:id="@+id/lbl_ticket_partner_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="3dp"
         android:text="Ticket: "
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/ticket_partner_code"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/lbl_ticket_descricao"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Descrição:"
@@ -29,11 +32,13 @@
 
     <TextView
         android:id="@+id/ticket_descricao"
+        android:layout_margin="3dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/lbl_ticket_empresa_solicitante"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Empresa: "
@@ -41,6 +46,7 @@
 
     <TextView
         android:id="@+id/ticket_empresa_solicitante"
+        android:layout_margin="3dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteX="0dp"
@@ -48,6 +54,7 @@
 
     <TextView
         android:id="@+id/lbl_ticket_responsavel"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Responsavel:"
@@ -55,11 +62,13 @@
 
     <TextView
         android:id="@+id/ticket_responsavel"
+        android:layout_margin="1dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/lbl_ticket_endereco"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Endereço:"
@@ -67,24 +76,27 @@
 
     <TextView
         android:id="@+id/ticket_endereco"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/lbl_ticket_sla"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SLA:"
         android:textStyle="bold" />
 
-
     <TextView
         android:id="@+id/ticket_sla"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/lbl_ticket_data_agendamento"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Agendamento:"
@@ -92,19 +104,25 @@
 
     <TextView
         android:id="@+id/ticket_data_agendamento"
+        android:layout_margin="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_margin="18dp">
 
         <Button
             android:id="@+id/btn_ticket_workflow"
+            style="@style/Widget.AppCompat.Button"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="invisible" />
+            android:textStyle="bold"
+            android:typeface="normal"
+            android:visibility="invisible"
+            tools:text="TRABALHAR" />
     </LinearLayout>
 
 
