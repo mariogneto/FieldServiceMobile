@@ -21,7 +21,7 @@ import java.util.List;
 
 import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
-import br.com.hitss.fieldservicemobile.rest.BaseController;
+import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
@@ -45,7 +45,6 @@ public class TicketListActivity extends AppCompatActivity {
     private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
 
     private static final String PREFS_NAME = "PrefsUser";
-    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
 
     private List<Ticket> mTickets = new ArrayList<>();
 
@@ -102,8 +101,7 @@ public class TicketListActivity extends AppCompatActivity {
     }
 
     private void loadTicketList(){
-        BaseController baseController = new BaseController(BASE_URL);
-        FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
+        final FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Long idUserFs = settings.getLong("idUserFsLogged", 0L);
@@ -175,8 +173,7 @@ public class TicketListActivity extends AppCompatActivity {
     }
 
     private void logoff() {
-        BaseController baseController = new BaseController(BASE_URL);
-        FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
+        final FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Long idUserFs = settings.getLong("idUserFsLogged", 0L);
         Call<Void> call = fieldserviceAPI.postLogoff(idUserFs);

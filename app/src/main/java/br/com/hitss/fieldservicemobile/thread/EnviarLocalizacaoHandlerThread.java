@@ -8,7 +8,7 @@ import android.os.Message;
 import android.util.Log;
 
 import br.com.hitss.fieldservicemobile.model.UserLocationHistory;
-import br.com.hitss.fieldservicemobile.rest.BaseController;
+import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
 import retrofit2.Call;
@@ -33,8 +33,7 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
                 new Handler(getLooper()) {
                     @Override
                     public void handleMessage(Message msg) {
-                        BaseController baseController = new BaseController(BASE_URL);
-                        FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
+                        FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
                         GPSTracker gpsTracker = new GPSTracker(context);
                         final Location location = gpsTracker.getLocation();
                         UserLocationHistory userLocationHistory = new UserLocationHistory(location.getLatitude(), location.getLongitude());

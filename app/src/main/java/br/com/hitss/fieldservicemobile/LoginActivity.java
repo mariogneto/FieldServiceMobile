@@ -20,7 +20,7 @@ import java.util.Map;
 
 import br.com.hitss.fieldservicemobile.model.UserFs;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
-import br.com.hitss.fieldservicemobile.rest.BaseController;
+import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -60,16 +60,14 @@ public class LoginActivity extends AppCompatActivity {
 
                 buttonLogin.setEnabled(false);
 
-                BaseController baseController = new BaseController(BASE_URL);
-                FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
-
+                FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
 
                 if(!editTextLogin.getText().toString().isEmpty() && !editTextPassword.getText().toString().isEmpty()){
                     Map<String, String> map = new HashMap<>();
-                   /* map.put("login",editTextLogin.getText().toString());
-                    map.put("password:", editTextPassword.getText().toString());*/
-                    map.put("login","aline.nunes.3@globalhitss.com.br");
-                    map.put("password:", "1234");
+                    map.put("login",editTextLogin.getText().toString());
+                    map.put("password:", editTextPassword.getText().toString());
+                    /*map.put("login","aline.nunes.3@globalhitss.com.br");
+                    map.put("password:", "1234");*/
                     Call<UserFs> call = fieldserviceAPI.login(map);
                     call.enqueue(new Callback<UserFs>() {
                         @Override

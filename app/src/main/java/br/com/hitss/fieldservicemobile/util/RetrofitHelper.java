@@ -1,4 +1,4 @@
-package br.com.hitss.fieldservicemobile.rest;
+package br.com.hitss.fieldservicemobile.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -18,6 +18,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import okhttp3.CertificatePinner;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
@@ -27,14 +28,20 @@ import okio.Buffer;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class BaseController {
+public class RetrofitHelper {
 
-    static String BASE_URL;
-    private final OkHttpClient client;
+    private static RetrofitHelper instance = null;
     private FieldserviceAPI fieldserviceAPI;
+    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
 
-    public BaseController(String baseUrl) {
-        BASE_URL = baseUrl;
+    public static RetrofitHelper getInstance() {
+        if(instance == null) {
+            instance = new RetrofitHelper();
+        }
+        return instance;
+    }
+
+    private RetrofitHelper() {
         X509TrustManager trustManager;
         SSLSocketFactory sslSocketFactory;
         try {
@@ -46,8 +53,7 @@ public class BaseController {
             throw new RuntimeException(e);
         }
 
-
-        client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
+        final OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request originalRequest = chain.request();

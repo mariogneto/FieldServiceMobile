@@ -1,10 +1,8 @@
 package br.com.hitss.fieldservicemobile;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +17,7 @@ import java.util.Locale;
 
 import br.com.hitss.fieldservicemobile.model.Ticket;
 import br.com.hitss.fieldservicemobile.model.TicketHistory;
-import br.com.hitss.fieldservicemobile.rest.BaseController;
+import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -93,8 +91,7 @@ public class TicketDetailActivity extends AppCompatActivity {
     }
 
     private void findById(Long idTicket) {
-        final BaseController baseController = new BaseController(BASE_URL);
-        final FieldserviceAPI fieldserviceAPI = baseController.getFieldserviceAPI();
+        final FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
         Call<Ticket> call = fieldserviceAPI.findById(Long.valueOf(idTicket));
         call.enqueue(new Callback<Ticket>() {
             @Override
