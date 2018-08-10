@@ -22,6 +22,8 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
     private static final String ARG_ITEM_ID = "ticket_id";
     private static final String ARG_ITEM_PARTNER_ID = "partnet_ticket_id";
 
+    private TicketListActivity mParent;
+
     private final List<Ticket> mTickets;
 
     private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
@@ -37,6 +39,7 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
     };
 
     public TicketListAdapter(TicketListActivity parent, List<Ticket> tickets) {
+        mParent = parent;
         mTickets = tickets;
     }
 
@@ -44,7 +47,6 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.ticket_list_content, parent, false);
-        //sparent.setBackgroundColor(Color.parseColor("#3366FF"));
         return new ViewHolder(view);
     }
 
@@ -77,6 +79,14 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
     @Override
     public int getItemCount() {
         return mTickets.size();
+    }
+
+    public TicketListActivity getmParent() {
+        return mParent;
+    }
+
+    public void setmParent(TicketListActivity mParent) {
+        this.mParent = mParent;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

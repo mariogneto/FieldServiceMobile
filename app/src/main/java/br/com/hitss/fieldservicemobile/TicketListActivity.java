@@ -21,10 +21,10 @@ import java.util.List;
 
 import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
-import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
 import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
+import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -41,8 +41,8 @@ public class TicketListActivity extends AppCompatActivity {
 
     private static final String TAG = TicketListActivity.class.getSimpleName();
 
-    private EnviarLocalizacaoRunnable enviarLocalizacaoRunnable;
-    private EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
+    public EnviarLocalizacaoRunnable enviarLocalizacaoRunnable;
+    public EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
 
     private static final String PREFS_NAME = "PrefsUser";
 
@@ -194,7 +194,6 @@ public class TicketListActivity extends AppCompatActivity {
             }
         });
     }
-
 
     @Override
     protected void onDestroy() {

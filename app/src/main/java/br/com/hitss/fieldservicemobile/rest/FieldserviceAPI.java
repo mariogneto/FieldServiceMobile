@@ -71,4 +71,12 @@ public interface FieldserviceAPI {
     @POST("users/{idUserFs}/locationhistory")
     Call<Void> postUserLocationHistory(@Path("idUserFs") Long idUserFs, @Body UserLocationHistory userLocationHistory);
 
+    @Headers({
+            "Accept: application/json",
+            "X-User-Agent: FIELD_SERVICE_MOBILE"
+    })
+    @POST("users/{idUserFs}/locationhistories")
+    Call<Void> postUserLocationHistories(@Path("idUserFs") Long idUserFs, @Body List<UserLocationHistory> userLocationHistories);
+
+
 }

@@ -3,6 +3,7 @@ package br.com.hitss.fieldservicemobile;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,8 +18,10 @@ import java.util.Locale;
 
 import br.com.hitss.fieldservicemobile.model.Ticket;
 import br.com.hitss.fieldservicemobile.model.TicketHistory;
-import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
+import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoHandlerThread;
+import br.com.hitss.fieldservicemobile.thread.EnviarLocalizacaoRunnable;
+import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -78,6 +81,7 @@ public class TicketDetailActivity extends AppCompatActivity {
             String idTicket = (String) extras.get(ARG_ITEM_ID);
             findById(Long.valueOf(idTicket));
         }
+
     }
 
     @Override
@@ -136,28 +140,41 @@ public class TicketDetailActivity extends AppCompatActivity {
                         buttonTicketWorkflow.setOnClickListener(new View.OnClickListener() {
                             final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                             final Long idUserFs = settings.getLong("idUserFsLogged", 0L);
+                            TicketHistory ticketHistory = null;
+                            SharedPreferences.Editor editor = settings.edit();
                             @Override
                             public void onClick(View v) {
-                                TicketHistory ticketHistory = null;
-                                SharedPreferences.Editor editor = settings.edit();
                                 switch (ticket.getTicketStatus().getName()) {
                                     case "ASSIGNED":
                                         ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "ON_THE_WAY", "PREENCHER...");
                                         editor.putBoolean("isWorking", false);
+                                        postHistoryByIdTicket(ticket.getIdTicket());
                                         break;
                                     case "ON_THE_WAY":
                                         ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", "PREENCHER...");
                                         editor.putBoolean("isWorking", true);
+                                        EnviarLocalizacaoRunnable enviarLocalizacaoRunnable;
+                                        EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
+                                        postHistoryByIdTicket(ticket.getIdTicket());
                                         break;
                                     case "IN_PROGRESS":
-                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "CLOSED", "PREENCHER...");
-                                        editor.putBoolean("isWorking", true);
+                                        Snackbar.make(buttonTicketWorkflow,"Tem certeza que deseja encerrar ?", Snackbar.LENGTH_LONG).setAction("Sim.", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "CLOSED", "PREENCHER...");
+                                                editor.putBoolean("isWorking", true);
+                                                postHistoryByIdTicket(ticket.getIdTicket());
+                                            }
+                                        }).show();
                                         break;
-                                    default:
-                                        editor.apply();
-                                        editor.commit();
                                 }
-                                Call<Void> call = fieldserviceAPI.postHistoryByIdTicket(ticket.getIdTicket(), ticketHistory);
+                                editor.apply();
+                                editor.commit();
+
+                            }
+
+                            private void postHistoryByIdTicket(Long ticketId) {
+                                Call<Void> call = fieldserviceAPI.postHistoryByIdTicket(ticketId, ticketHistory);
                                 call.enqueue(new Callback<Void>() {
                                     @Override
                                     public void onResponse(Call<Void> call, Response<Void> response) {
