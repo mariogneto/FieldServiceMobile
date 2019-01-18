@@ -83,8 +83,8 @@ public class LoginActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             } else {
-                                Log.i(TAG, "usuario não encontrado.");
-                                Toast.makeText(LoginActivity.this, "usuario não encontrado.", Toast.LENGTH_LONG).show();
+                                Log.i(TAG, "usuario ou senha não conferem.");
+                                Toast.makeText(LoginActivity.this, "usuario ou senha não conferem.", Toast.LENGTH_LONG).show();
 
                                 counter--;
                                 textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(counter)));
