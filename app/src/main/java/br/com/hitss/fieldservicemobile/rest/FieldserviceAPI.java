@@ -10,6 +10,7 @@ import br.com.hitss.fieldservicemobile.model.UserLocationHistory;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.HeaderMap;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
@@ -55,7 +56,7 @@ public interface FieldserviceAPI {
             "X-User-Agent: FIELD_SERVICE_MOBILE"
     })
     @POST("tickets/{idTicket}/history")
-    Call<Void> postHistoryByIdTicket(@Path("idTicket")Long idTicket, @Body TicketHistory ticketHistory);
+    Call<Void> postHistoryByIdTicket(@Header("Authentication") String jwt, @Path("idTicket")Long idTicket, @Body TicketHistory ticketHistory);
 
     @Headers({
             "Accept: application/json",

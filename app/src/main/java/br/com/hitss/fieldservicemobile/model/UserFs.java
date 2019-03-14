@@ -18,6 +18,7 @@ public class UserFs implements Serializable {
 	private String partnerUserCode;
 	private String phone;
 	private String status;
+	private AuthenticationSM authenticationSM;
 
 	private Location location;
 
@@ -154,4 +155,12 @@ public class UserFs implements Serializable {
 		}
 		this.timeRecordings.add(timeRcording);
 	}
+
+    public AuthenticationSM getAuthenticationSM() {
+        return authenticationSM;
+    }
+
+    public void setAuthenticationSM(AuthenticationSM authenticationSM) {
+        this.authenticationSM = authenticationSM;
+    }
 }

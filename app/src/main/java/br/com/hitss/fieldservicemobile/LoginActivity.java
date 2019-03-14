@@ -38,8 +38,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "PrefsUser";
 
-    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +76,7 @@ public class LoginActivity extends AppCompatActivity {
                                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putLong("idUserFsLogged", userFs.getIdUserFs());
+                                editor.putString("jwt", userFs.getAuthenticationSM().getJwt());
                                 editor.commit();
                                 Intent intent = new Intent(LoginActivity.this, TicketListActivity.class);
                                 startActivity(intent);
