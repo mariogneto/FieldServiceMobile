@@ -56,7 +56,7 @@ public interface FieldserviceAPI {
             "X-User-Agent: FIELD_SERVICE_MOBILE"
     })
     @POST("tickets/{idTicket}/history")
-    Call<Void> postHistoryByIdTicket(@Header("Authentication") String jwt, @Path("idTicket")Long idTicket, @Body TicketHistory ticketHistory);
+    Call<Void> postHistoryByIdTicket(@Path("idTicket")Long idTicket, @Body TicketHistory ticketHistory);
 
     @Headers({
             "Accept: application/json",

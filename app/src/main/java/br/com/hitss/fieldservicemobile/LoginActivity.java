@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
                                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putLong("idUserFsLogged", userFs.getIdUserFs());
-                                editor.putString("jwt", userFs.getAuthenticationSM().getJwt());
+                                //editor.putString("jwt", userFs.getAuthenticationSM().getJwt());
                                 editor.commit();
                                 Intent intent = new Intent(LoginActivity.this, TicketListActivity.class);
                                 startActivity(intent);

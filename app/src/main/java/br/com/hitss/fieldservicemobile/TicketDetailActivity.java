@@ -138,7 +138,6 @@ public class TicketDetailActivity extends AppCompatActivity {
                         buttonTicketWorkflow.setOnClickListener(new View.OnClickListener() {
                             final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                             final Long idUserFs = settings.getLong("idUserFsLogged", 0L);
-                            final String jwt = settings.getString("jwt", null);
                             TicketHistory ticketHistory = null;
                             SharedPreferences.Editor editor = settings.edit();
                             @Override
@@ -160,7 +159,7 @@ public class TicketDetailActivity extends AppCompatActivity {
                                         Snackbar.make(buttonTicketWorkflow,"Tem certeza que deseja encerrar ?", Snackbar.LENGTH_LONG).setAction("Sim.", new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-                                                ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "CLOSED", "PREENCHER...");
+                                                ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "RESOLVED", "PREENCHER...");
                                                 editor.putBoolean("isWorking", true);
                                                 postHistoryByIdTicket(ticket.getIdTicket());
                                             }
@@ -173,7 +172,7 @@ public class TicketDetailActivity extends AppCompatActivity {
                             }
 
                             private void postHistoryByIdTicket(Long ticketId) {
-                                Call<Void> call = fieldserviceAPI.postHistoryByIdTicket(jwt, ticketId, ticketHistory);
+                                Call<Void> call = fieldserviceAPI.postHistoryByIdTicket(ticketId, ticketHistory);
                                 call.enqueue(new Callback<Void>() {
                                     @Override
                                     public void onResponse(Call<Void> call, Response<Void> response) {
