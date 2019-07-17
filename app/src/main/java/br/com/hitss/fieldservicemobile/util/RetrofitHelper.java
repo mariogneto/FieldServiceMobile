@@ -32,7 +32,7 @@ public class RetrofitHelper {
 
     private static RetrofitHelper instance = null;
     private FieldserviceAPI fieldserviceAPI;
-    private static final String BASE_URL = "https://fieldserviceshmg.embratel.com.br:8443/fieldservice/v1/";
+    private static final String BASE_URL = "https://fieldservices.embratel.com.br:8443/fieldservice/v1/";
     //private static final String BASE_URL = "http://localhost:7080/fieldservice/v1/";
 
     public static RetrofitHelper getInstance() {

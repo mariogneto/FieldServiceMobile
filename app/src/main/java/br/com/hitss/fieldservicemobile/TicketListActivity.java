@@ -124,23 +124,8 @@ public class TicketListActivity extends AppCompatActivity {
                 ticketListRecyclerView.setLayoutManager(linearLayoutManager);
 
                 if (mTickets != null && !mTickets.isEmpty()) {
-
-                    boolean onTheWay = false;
-                    for (Ticket ticket : mTickets) {
-                        if(ticket.getTicketStatus().getName().equals("ON_THE_WAY"))
-                            onTheWay = true;
-                    }
-                    if(onTheWay){
-                        Log.i(TAG, response.toString());
-                        buscarTicketsBackground = false;
-                    } else {
-                        //Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putBoolean("isWorking", true);
-                        Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
-                        Log.i(TAG, "Nenhum ticket encontrado.");
-                        buscarTicketsBackground = true;
-                    }
+                    Log.i(TAG, response.toString());
+                    buscarTicketsBackground = false;
                 } else {
                     Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
                     SharedPreferences.Editor editor = settings.edit();

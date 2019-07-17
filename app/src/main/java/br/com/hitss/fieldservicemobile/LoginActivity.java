@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -15,10 +16,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.onesignal.OSNotificationOpenResult;
+import com.onesignal.OneSignal;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import br.com.hitss.fieldservicemobile.model.UserFs;
+import br.com.hitss.fieldservicemobile.model.UserLocationHistory;
+import br.com.hitss.fieldservicemobile.pushnotification.NotificationOpenedHandler;
 import br.com.hitss.fieldservicemobile.rest.FieldserviceAPI;
 import br.com.hitss.fieldservicemobile.util.RetrofitHelper;
 import br.com.hitss.fieldservicemobile.util.GPSTracker;
@@ -41,6 +48,14 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // OneSignal Initialization
+        OneSignal.startInit(this)
+                .setNotificationOpenedHandler(new NotificationOpenedHandler(getApplication()))
+                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
+                .unsubscribeWhenNotificationsAreDisabled(true)
+                .init();
+
         onPermision();
         setContentView(R.layout.activity_login);
 
@@ -58,14 +73,12 @@ public class LoginActivity extends AppCompatActivity {
 
                 buttonLogin.setEnabled(false);
 
-                FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
+                final FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
 
                 if(!editTextLogin.getText().toString().isEmpty() && !editTextPassword.getText().toString().isEmpty()){
                     Map<String, String> map = new HashMap<>();
                     map.put("login",editTextLogin.getText().toString());
                     map.put("password:", editTextPassword.getText().toString());
-                    /*map.put("login","aline.nunes.3@globalhitss.com.br");
-                    map.put("password:", "1234");*/
                     Call<UserFs> call = fieldserviceAPI.login(map);
                     call.enqueue(new Callback<UserFs>() {
                         @Override
@@ -73,10 +86,33 @@ public class LoginActivity extends AppCompatActivity {
                             if(response.isSuccessful()) {
                                 UserFs userFs = response.body();
                                 Log.i(TAG, userFs.getLogin());
+
+                                FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
+                                GPSTracker gpsTracker = new GPSTracker(LoginActivity.this);
+                                Location location = gpsTracker.getLocation();
+                                UserLocationHistory userLocationHistory = new UserLocationHistory(location.getLatitude(), location.getLongitude());
+
+                                Call<Void> call2 = fieldserviceAPI.postUserLocationHistory(userFs.getIdUserFs(), userLocationHistory);
+                                call2.enqueue(new retrofit2.Callback<Void>() {
+                                    @Override
+                                    public void onResponse(Call<Void> call, Response<Void> response) {
+                                        if (response.isSuccessful()) {
+                                           Log.i(TAG,"Envio de localização após login feita com sucesso.");
+                                        } else {
+                                            onFailure(call, new Throwable());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<Void> call, Throwable t) {
+                                        Log.e(TAG, "Erro ao enviar posicao tecnico.", t);
+                                    }
+                                });
+
+
                                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putLong("idUserFsLogged", userFs.getIdUserFs());
-                                //editor.putString("jwt", userFs.getAuthenticationSM().getJwt());
                                 editor.commit();
                                 Intent intent = new Intent(LoginActivity.this, TicketListActivity.class);
                                 startActivity(intent);
@@ -107,31 +143,6 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "Preencha todos os campos.", Toast.LENGTH_LONG).show();
                     buttonLogin.setEnabled(true);
                 }
-
-
-                /*final BuscaUserAsync buscaTicketsAsync = new BuscaUserAsync();
-                Log.i(TAG, "AsyncTask senado chamado Thread: " + Thread.currentThread().getName());
-                buscaTicketsAsync.execute(editTextLogin.getText().toString(), editTextPassword.getText().toString());
-                buttonLogin.setEnabled(false);
-
-                //setting timeout thread for async task
-                Thread thread = new Thread() {
-                    public void run() {
-                        try {
-                            buscaTicketsAsync.get(20000, TimeUnit.MILLISECONDS);
-                        } catch (Exception e) {
-                            buscaTicketsAsync.cancel(true);
-                            LoginActivity.this.runOnUiThread(new Runnable() {
-                                @SuppressLint("ShowToast")
-                                public void run() {
-                                    Toast.makeText(LoginActivity.this, "Time Out.", Toast.LENGTH_LONG).show();
-                                    buttonLogin.setEnabled(true);
-                                }
-                            });
-                        }
-                    }
-                };
-                thread.start();*/
             }
         });
 
@@ -158,49 +169,4 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-
-    /*private class BuscaUserAsync extends AsyncTask<String, Void, UserFs> {
-        @Override
-        protected void onPreExecute() {
-            Log.i(TAG, "Buscando user");
-        }
-
-        @Override
-        protected UserFs doInBackground(String... params) {
-            try {
-
-                CustomTrust customTrust = new CustomTrust();
-                customTrust.run(params[0],params[1]);
-
-                Log.i("RETRO","TEST");
-                //return new UserRestClient().login(params[0],params[1]);
-                return null;
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao buscar tickets", e);
-                //throw e;
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(UserFs user) {
-            if (user != null) {
-                Log.i(TAG, user.getLogin());
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("idUserFsLogged", user.getIdUserFs());
-                editor.commit();
-                Intent intent = new Intent(LoginActivity.this, TicketListActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                Log.i(TAG, "não encontrado.");
-                counter--;
-                textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(counter)));
-                buttonLogin.setEnabled(true);
-                if (counter == 0)
-                    buttonLogin.setEnabled(false);
-            }
-        }
-    }*/
 }

@@ -43,13 +43,13 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
                         UserLocationHistory lastUserLocationHistory = userLocationHistoryDAO.getLastUserLocationHistory();
                         if(lastUserLocationHistory == null ||  (!lastUserLocationHistory.getLatitude().equals(userLocationHistory.getLatitude())
                                 || !lastUserLocationHistory.getLongitude().equals(userLocationHistory.getLongitude()))){
-                            Log.i(TAG,"Location inserida: " + userLocationHistory.getLatitude());
+                            Log.i(TAG,"Location inserida, Latitude: " + userLocationHistory.getLatitude() + " - Longitude: " + userLocationHistory.getLongitude());
                             userLocationHistoryDAO.insert(userLocationHistory);
                             count++;
                         } else {
-                            Log.i(TAG,"NAO INSERIDA: " + userLocationHistory.getLatitude());
+                            Log.i(TAG,"NAO INSERIDA  Latitude: " + userLocationHistory.getLatitude() + " - Longitude: " + userLocationHistory.getLongitude());
                         }
-                        if(count >= 20) {
+                        if(count >= 10) {
                             Call<Void> call = fieldserviceAPI.postUserLocationHistories(idUserFsLogged, userLocationHistoryDAO.getAll());
                             call.enqueue(new retrofit2.Callback<Void>() {
                                 @Override
@@ -68,11 +68,8 @@ public class EnviarLocalizacaoHandlerThread extends HandlerThread {
                                 }
                             });
                         }
-
                     }
-
                 };
-
         handler.sendMessage(new Message());
     }
 }
