@@ -16,8 +16,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+
 
 import br.com.hitss.fieldservicemobile.adapter.TicketListAdapter;
 import br.com.hitss.fieldservicemobile.model.Ticket;
@@ -46,7 +51,10 @@ public class TicketListActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "PrefsUser";
 
+    private List<Ticket> mTicketsResolved = new ArrayList<>();
+    private List<Ticket> mTicketsWork = new ArrayList<>();
     private List<Ticket> mTickets = new ArrayList<>();
+
 
     private boolean buscarTicketsBackground = true;
 
@@ -79,8 +87,9 @@ public class TicketListActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             public void run() {
                 while (true) {
-                    if (buscarTicketsBackground)
+                    if (buscarTicketsBackground) {
                         loadTicketList();
+                    }
                     try {
                         Thread.sleep(delayListarTickets);
                     } catch (InterruptedException e) {
@@ -96,51 +105,87 @@ public class TicketListActivity extends AppCompatActivity {
         enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(5000);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         enviarLocalizacaoRunnable.setIdUSerFsLogged(settings.getLong("idUserFsLogged", 0L));
-
         enviarLocalizacaoRunnable.start();
     }
 
-    private void loadTicketList(){
+    private void loadTicketList() {
+
         final FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
+
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Calendar cal = Calendar.getInstance();
+
+        String endDate = df.format(cal.getTime());
+
+        cal.add(Calendar.DATE, -100);
+        String startDate = df.format(cal.getTime());
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Long idUserFs = settings.getLong("idUserFsLogged", 0L);
+
+        mTickets.clear();
+
         Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs, "2,3,4");
         call.enqueue(new Callback<List<Ticket>>() {
             @Override
             public void onResponse(Call<List<Ticket>> call, Response<List<Ticket>> response) {
                 SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list_recycler_view);
-                assert ticketListRecyclerView != null;
-                if(response.isSuccessful()){
-                    mTickets = response.body();
-                    if(mTickets == null)
-                        mTickets = new ArrayList<>();
+
+                if (response.isSuccessful()) {
+                    mTicketsWork = response.body();
+                    if (mTicketsWork != null && !mTicketsWork.isEmpty())
+                        mTickets.addAll(mTicketsWork);
                 }
 
-                ticketListRecyclerView.setAdapter(new TicketListAdapter(TicketListActivity.this, mTickets));
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ticketListRecyclerView.getContext()
-                        , LinearLayoutManager.VERTICAL, false);
-                ticketListRecyclerView.setLayoutManager(linearLayoutManager);
 
-                if (mTickets != null && !mTickets.isEmpty()) {
+                if (mTicketsWork != null && !mTicketsWork.isEmpty()) {
                     Log.i(TAG, response.toString());
                     buscarTicketsBackground = false;
                 } else {
-                    Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
+                    //Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putBoolean("isWorking", true);
-                    Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
-                    Log.i(TAG, "Nenhum ticket encontrado.");
+                    //Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "Nenhum ticket encontrado com idStatus 2,3 e 4.");
                     buscarTicketsBackground = true;
                 }
             }
 
             @Override
             public void onFailure(Call<List<Ticket>> call, Throwable t) {
-                Log.e(TAG, "erro ao carregar tickets: "+ t.getMessage());
+                Log.e(TAG, "erro ao carregar tickets: " + t.getMessage());
             }
         });
+
+        Call<List<Ticket>> callResolved = fieldserviceAPI.findByidUserLoggedDate(idUserFs, "5", startDate, endDate);
+        callResolved.enqueue(new Callback<List<Ticket>>() {
+            @Override
+            public void onResponse(Call<List<Ticket>> callResolved, Response<List<Ticket>> responseResolved) {
+                RecyclerView ticketListRecyclerView = findViewById(R.id.ticket_list_recycler_view);
+                assert ticketListRecyclerView != null;
+                if (responseResolved.isSuccessful()) {
+                    mTicketsResolved = responseResolved.body();
+                    if (mTicketsResolved != null && !mTicketsResolved.isEmpty()){
+                        Collections.reverse(mTicketsResolved);
+                        mTickets.addAll(mTicketsResolved);
+                    }
+                    if (mTickets == null) {
+                        mTickets = new ArrayList<>();
+                    }
+                }
+
+                ticketListRecyclerView.setAdapter(new TicketListAdapter(TicketListActivity.this, mTickets));
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ticketListRecyclerView.getContext()
+                        , LinearLayoutManager.VERTICAL, false);
+                ticketListRecyclerView.setLayoutManager(linearLayoutManager);
+            }
+            @Override
+            public void onFailure(Call<List<Ticket>> callResolved, Throwable t) {
+                Log.e(TAG, "erro ao carregar tickets com status RESOLVIDO: " + t.getMessage());
+            }
+        });
+
+
     }
 
     @Override
@@ -180,8 +225,8 @@ public class TicketListActivity extends AppCompatActivity {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                if(response.isSuccessful())
-                    Log.i(TAG,"Logoff concluido com sucesso.");
+                if (response.isSuccessful())
+                    Log.i(TAG, "Logoff concluido com sucesso.");
                 enviarLocalizacaoRunnable.stop();
                 enviarLocalizacaoHandlerThread.quit();
                 buscarTicketsBackground = false;
@@ -190,7 +235,7 @@ public class TicketListActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Log.e(TAG,t.getMessage());
+                Log.e(TAG, t.getMessage());
             }
         });
     }

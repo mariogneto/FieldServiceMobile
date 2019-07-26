@@ -1,5 +1,9 @@
 package br.com.hitss.fieldservicemobile.rest;
 
+import android.text.method.DateTimeKeyListener;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +40,12 @@ public interface FieldserviceAPI {
     @GET("tickets")
     Call<List<Ticket>> findByidUserLogged(@Query("idUserTechnician") Long idUserTechnician,
                                           @Query("idsTicketStatus") String idsTicketStatus);
+
+    @GET("tickets")
+    Call<List<Ticket>> findByidUserLoggedDate(@Query("idUserTechnician") Long idUserTechnician,
+                                          @Query("idsTicketStatus") String idsTicketStatus,
+                                          @Query("startDateTimeCreation") String startDateTimeCreation,
+                                          @Query("endDateTimeCreation") String endDateTimeCreation);
 
     @Headers({
             "Accept: application/json",

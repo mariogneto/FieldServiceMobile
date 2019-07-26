@@ -75,15 +75,15 @@ public class LoginActivity extends AppCompatActivity {
 
                 final FieldserviceAPI fieldserviceAPI = RetrofitHelper.getInstance().getFieldserviceAPI();
 
-                if(!editTextLogin.getText().toString().isEmpty() && !editTextPassword.getText().toString().isEmpty()){
+                if (!editTextLogin.getText().toString().isEmpty() && !editTextPassword.getText().toString().isEmpty()) {
                     Map<String, String> map = new HashMap<>();
-                    map.put("login",editTextLogin.getText().toString());
+                    map.put("login", editTextLogin.getText().toString());
                     map.put("password:", editTextPassword.getText().toString());
                     Call<UserFs> call = fieldserviceAPI.login(map);
                     call.enqueue(new Callback<UserFs>() {
                         @Override
                         public void onResponse(Call<UserFs> call, Response<UserFs> response) {
-                            if(response.isSuccessful()) {
+                            if (response.isSuccessful()) {
                                 UserFs userFs = response.body();
                                 Log.i(TAG, userFs.getLogin());
 
@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void onResponse(Call<Void> call, Response<Void> response) {
                                         if (response.isSuccessful()) {
-                                           Log.i(TAG,"Envio de localização após login feita com sucesso.");
+                                            Log.i(TAG, "Envio de localização após login feita com sucesso.");
                                         } else {
                                             onFailure(call, new Throwable());
                                         }
@@ -147,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         //TODO ficar olhando se está ativo o GPS
-        if (gpsTracker.canGetLocation()){
+        if (gpsTracker.canGetLocation()) {
             Toast.makeText(LoginActivity.this, "Sinal GPS encontrado.", Toast.LENGTH_LONG).show();
             buttonLogin.setEnabled(true);
             editTextLogin.setEnabled(true);
@@ -167,6 +167,9 @@ public class LoginActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 128);
         }
+
+
+
     }
 
 }
