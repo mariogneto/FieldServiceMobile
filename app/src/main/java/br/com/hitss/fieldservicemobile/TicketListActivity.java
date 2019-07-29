@@ -133,8 +133,9 @@ public class TicketListActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     mTicketsWork = response.body();
-                    if (mTicketsWork != null && !mTicketsWork.isEmpty())
+                    if (mTicketsWork != null && !mTicketsWork.isEmpty()) {
                         mTickets.addAll(mTicketsWork);
+                    }
                 }
 
 
