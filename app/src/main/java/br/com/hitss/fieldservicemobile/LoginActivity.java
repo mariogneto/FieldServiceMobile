@@ -124,8 +124,9 @@ public class LoginActivity extends AppCompatActivity {
                                 counter--;
                                 textViewInfo.setText("Nr de tentativas: ".concat(String.valueOf(counter)));
                                 buttonLogin.setEnabled(true);
-                                if (counter == 0)
+                                if (counter == 0) {
                                     buttonLogin.setEnabled(false);
+                                }
                             }
                         }
 
