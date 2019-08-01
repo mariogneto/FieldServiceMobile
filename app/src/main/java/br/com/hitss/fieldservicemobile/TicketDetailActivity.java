@@ -139,7 +139,7 @@ public class TicketDetailActivity extends AppCompatActivity {
                                 buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#FF0000"));
                                 buttonTicketWorkflow.setVisibility(View.VISIBLE);
                                 buttonTicketPendent.setText("PENDENTE");
-                                buttonTicketPendent.setBackgroundColor(Color.parseColor("#D3D3D3"));
+                                buttonTicketPendent.setBackgroundColor(Color.parseColor("#FFFF00"));
                                 buttonTicketPendent.setVisibility(View.VISIBLE);
                                 txtTicketNote.setVisibility(View.VISIBLE);
                                 break;
