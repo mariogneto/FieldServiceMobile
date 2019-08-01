@@ -143,6 +143,11 @@ public class TicketDetailActivity extends AppCompatActivity {
                                 buttonTicketPendent.setVisibility(View.VISIBLE);
                                 txtTicketNote.setVisibility(View.VISIBLE);
                                 break;
+                            case "PENDENT":
+                                buttonTicketWorkflow.setText("TRABALHAR");
+                                buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#32CD32"));
+                                buttonTicketWorkflow.setVisibility(View.VISIBLE);
+                                break;
                             default:
                                 buttonTicketWorkflow.setVisibility(View.INVISIBLE);
                                 txtTicketNote.setVisibility(View.INVISIBLE);
@@ -215,6 +220,11 @@ public class TicketDetailActivity extends AppCompatActivity {
                                                 postHistoryByIdTicket(ticket.getIdTicket());
                                             }
                                         }).show();
+                                        break;
+                                    case "PENDENT":
+                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", (txtTicketNote.getText() != null ? txtTicketNote.getText().toString() : ""));
+                                        editor.putBoolean("isWorking", false);
+                                        postHistoryByIdTicket(ticket.getIdTicket());
                                         break;
                                 }
                                 editor.apply();
