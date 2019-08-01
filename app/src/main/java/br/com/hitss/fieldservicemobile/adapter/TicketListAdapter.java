@@ -68,6 +68,10 @@ public class TicketListAdapter extends RecyclerView.Adapter<TicketListAdapter.Vi
                 holder.mStatus.setText("TRABALHANDO");
                 holder.mStatus.setBackgroundColor(Color.parseColor("#32CD32"));
                 break;
+            case "PENDENT":
+                holder.mStatus.setText("PENDENTE");
+                holder.mStatus.setBackgroundColor(Color.parseColor("#F7FE2E"));
+                break;
             default:
                 holder.mStatus.setText("RESOLVIDO");
                 holder.mStatus.setBackgroundColor(Color.parseColor("#D3D3D3"));

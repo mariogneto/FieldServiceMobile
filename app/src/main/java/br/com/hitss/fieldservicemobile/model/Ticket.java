@@ -23,6 +23,7 @@ public class Ticket implements Serializable {
 	private String serviceDeskRequesterPhone;
 	private String shiftScheduling;
 	private Date sla;
+	private String note;
 
 	private TicketStatus ticketStatus;
 	private UserFs userTechnician;
@@ -178,5 +179,13 @@ public class Ticket implements Serializable {
 
 	public void setTicketHistories(List<TicketHistory> ticketHistories) {
 		this.ticketHistories = ticketHistories;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
 	}
 }

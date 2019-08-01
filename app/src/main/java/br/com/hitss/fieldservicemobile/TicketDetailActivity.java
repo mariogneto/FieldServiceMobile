@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -47,8 +48,11 @@ public class TicketDetailActivity extends AppCompatActivity {
     private TextView ticketEndereco;
     private TextView ticketResponsavel;
     private TextView ticketDataAgendamento;
+    private TextView ticketNote;
 
     private Button buttonTicketWorkflow;
+    private Button buttonTicketPendent;
+    private TextInputEditText txtTicketNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,9 @@ public class TicketDetailActivity extends AppCompatActivity {
         ticketEmpresaSolicitante = findViewById(R.id.ticket_empresa_solicitante);
         ticketSla = findViewById(R.id.ticket_sla);
         buttonTicketWorkflow = findViewById(R.id.btn_ticket_workflow);
+        buttonTicketPendent = findViewById(R.id.btn_ticket_pendent);
+        txtTicketNote = findViewById(R.id.txt_ticket_note);
+        ticketNote = findViewById(R.id.ticket_note);
 
         Bundle extras = this.getIntent().getExtras();
         if (extras != null) {
@@ -118,6 +125,8 @@ public class TicketDetailActivity extends AppCompatActivity {
                             ticketSla.setText(f.format(ticket.getSla()));
                         if(ticket.getDateScheduling() != null)
                             ticketDataAgendamento.setText(f.format(ticket.getDateScheduling()));
+                        if(ticket.getNote() != null)
+                            ticketNote.setText(ticket.getNote());
 
                         switch (ticket.getTicketStatus().getName()) {
                             case "ON_THE_WAY":
@@ -129,11 +138,49 @@ public class TicketDetailActivity extends AppCompatActivity {
                                 buttonTicketWorkflow.setText("RESOLVER");
                                 buttonTicketWorkflow.setBackgroundColor(Color.parseColor("#FF0000"));
                                 buttonTicketWorkflow.setVisibility(View.VISIBLE);
+                                buttonTicketPendent.setText("PENDENTE");
+                                buttonTicketPendent.setBackgroundColor(Color.parseColor("#D3D3D3"));
+                                buttonTicketPendent.setVisibility(View.VISIBLE);
+                                txtTicketNote.setVisibility(View.VISIBLE);
                                 break;
                             default:
                                 buttonTicketWorkflow.setVisibility(View.INVISIBLE);
+                                txtTicketNote.setVisibility(View.INVISIBLE);
                                 break;
                         }
+
+                        buttonTicketPendent.setOnClickListener(new View.OnClickListener() {
+                            final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                            final Long idUserFs = settings.getLong("idUserFsLogged", 0L);
+                            TicketHistory ticketHistory = null;
+                            @Override
+                            public void onClick(View v) {
+
+                                Snackbar.make(buttonTicketPendent, "Tem certeza que deseja pendente ?", Snackbar.LENGTH_LONG).setAction("Sim.", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "PENDENT", (txtTicketNote.getText() != null ? txtTicketNote.getText().toString() : ""));
+                                        postHistoryByIdTicket(ticket.getIdTicket());
+                                    }
+                                }).show();
+                            }
+
+                            private void postHistoryByIdTicket(Long ticketId) {
+                                Call<Void> call = fieldserviceAPI.postHistoryByIdTicket(ticketId, ticketHistory);
+                                call.enqueue(new Callback<Void>() {
+                                    @Override
+                                    public void onResponse(Call<Void> call, Response<Void> response) {
+                                        Log.i(TAG, "idTicket: " + ticket.getIdTicket());
+                                        finish();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<Void> call, Throwable t) {
+                                        Log.e(TAG,t.getMessage());
+                                    }
+                                });
+                            }
+                        });
 
                         buttonTicketWorkflow.setOnClickListener(new View.OnClickListener() {
                             final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -144,22 +191,26 @@ public class TicketDetailActivity extends AppCompatActivity {
                             public void onClick(View v) {
                                 switch (ticket.getTicketStatus().getName()) {
                                     case "ASSIGNED":
-                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "ON_THE_WAY", "PREENCHER...");
+                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "ON_THE_WAY", (txtTicketNote.getText() != null ? txtTicketNote.getText().toString() : ""));
                                         editor.putBoolean("isWorking", false);
                                         postHistoryByIdTicket(ticket.getIdTicket());
                                         break;
                                     case "ON_THE_WAY":
-                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", "PREENCHER...");
+                                        ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "IN_PROGRESS", (txtTicketNote.getText() != null ? txtTicketNote.getText().toString() : ""));
                                         editor.putBoolean("isWorking", true);
-                                        EnviarLocalizacaoRunnable enviarLocalizacaoRunnable;
-                                        EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread;
+                                        EnviarLocalizacaoHandlerThread enviarLocalizacaoHandlerThread = new EnviarLocalizacaoHandlerThread();
+                                        enviarLocalizacaoHandlerThread.start();
+                                        EnviarLocalizacaoRunnable enviarLocalizacaoRunnable = new EnviarLocalizacaoRunnable(enviarLocalizacaoHandlerThread, getParent());
+                                        enviarLocalizacaoRunnable.setDelayEnvioLocalizacao(1000);
+                                        enviarLocalizacaoRunnable.start();
+
                                         postHistoryByIdTicket(ticket.getIdTicket());
                                         break;
                                     case "IN_PROGRESS":
                                         Snackbar.make(buttonTicketWorkflow,"Tem certeza que deseja encerrar ?", Snackbar.LENGTH_LONG).setAction("Sim.", new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-                                                ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "RESOLVED", "PREENCHER...");
+                                                ticketHistory = new TicketHistory(ticket.getIdTicket(), ticket.getUserTechnician().getIdUserFs(), idUserFs, "RESOLVED", (txtTicketNote.getText() != null ? txtTicketNote.getText().toString() : ""));
                                                 editor.putBoolean("isWorking", true);
                                                 postHistoryByIdTicket(ticket.getIdTicket());
                                             }

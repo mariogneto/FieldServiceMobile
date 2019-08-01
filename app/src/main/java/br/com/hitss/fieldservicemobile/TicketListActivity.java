@@ -125,7 +125,7 @@ public class TicketListActivity extends AppCompatActivity {
 
         mTickets.clear();
 
-        Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs, "2,3,4");
+        Call<List<Ticket>> call = fieldserviceAPI.findByidUserLogged(idUserFs, "2,3,4,7");
         call.enqueue(new Callback<List<Ticket>>() {
             @Override
             public void onResponse(Call<List<Ticket>> call, Response<List<Ticket>> response) {
@@ -138,16 +138,13 @@ public class TicketListActivity extends AppCompatActivity {
                     }
                 }
 
-
                 if (mTicketsWork != null && !mTicketsWork.isEmpty()) {
                     Log.i(TAG, response.toString());
                     buscarTicketsBackground = false;
                 } else {
-                    //Boolean isUserOnTheWay = settings.getBoolean("isUserOnTheWay", false);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putBoolean("isWorking", true);
-                    //Toast.makeText(TicketListActivity.this, "Nenhum ticket encontrado.", Toast.LENGTH_LONG).show();
-                    Log.i(TAG, "Nenhum ticket encontrado com idStatus 2,3 e 4.");
+                    Log.i(TAG, "Nenhum ticket encontrado com idStatus 2,3,4 e 7.");
                     buscarTicketsBackground = true;
                 }
             }
